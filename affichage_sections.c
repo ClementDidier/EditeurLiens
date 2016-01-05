@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
 char* sh_type(Elf32_Word typeData)
 {
 	switch(typeData)
@@ -58,37 +57,60 @@ char* sh_type(Elf32_Word typeData)
 			return "HIUSER";
 			break;
 		default:
-			return "NULL";
+			return "ARM_ATTRIBUTES";
 	}
 }
 
-// TODO : Concatener les caractères des flags detectés
 char* sh_flags(Elf32_Word flagsData)
 {
-	char* result = (char*)malloc(sizeof(char) * 4);
+	char* result = (char*)malloc(sizeof(char) * 3);
 	
 	// WRITE FLAG
-	if(flagsData & 1)
+	if(flagsData & 0x1)
 	{
 		strcat(result, "W");
 	}
 	// ALLOC FLAG
-	else if((flagsData >> 1) & 1) 
+	if(flagsData & 0x2) 
 	{
 		strcat(result, "A");
 	}
 	// EXECINSTR
-	else if((flagsData >> 2) & 1)
+	if(flagsData & 0x4)
 	{
 		strcat(result, "X");
 	}
 	// MASKPROC
-	else if((flagsData >> 3) & 1)
+	if(flagsData & 0xf0000000)
 	{
-		
+		// TODO : strcat le symbol du masque, à afficher
 	}
 	
 	return result;
+}
+
+// Attention : ne bytes swap qu'une partie des valeurs
+void bytes_swap_file_header(Elf32_Ehdr* header)
+{
+	header->e_shoff = __bswap_32(header->e_shoff);
+	header->e_phnum = __bswap_16(header->e_phnum);
+	header->e_shentsize = __bswap_16(header->e_shentsize);
+	header->e_shnum = __bswap_16(header->e_shnum);
+	header->e_shstrndx = __bswap_16(header->e_shstrndx);
+}
+
+void bytes_swap_section_header(Elf32_Shdr* section)
+{
+	section->sh_name = __bswap_32(section->sh_name);
+	section->sh_type = __bswap_32(section->sh_type);
+	section->sh_flags = __bswap_32(section->sh_flags);
+	section->sh_addr = __bswap_32(section->sh_addr);
+	section->sh_offset = __bswap_32(section->sh_offset);
+	section->sh_size = __bswap_32(section->sh_size);
+	section->sh_link = __bswap_32(section->sh_link);
+	section->sh_info = __bswap_32(section->sh_info);
+	section->sh_addralign = __bswap_32(section->sh_addralign);
+	section->sh_entsize = __bswap_32(section->sh_entsize);
 }
 
 void afficher_table_sections(FILE* elfFile)
@@ -100,37 +122,66 @@ void afficher_table_sections(FILE* elfFile)
 	Elf32_Shdr elfSectionHeader;
 
 	// Lecture de l'entête du fichier .ELF
-	fread(&elfFileHeader, 1, sizeof(Elf32_Ehdr), elfFile);
+	fread(&elfFileHeader, sizeof(Elf32_Ehdr), 1, elfFile);
+	
+	// Swap les valeurs de la structure
+	bytes_swap_file_header(&elfFileHeader);
 	
 	// Offset du tableau d'entête de sections
-	int headerSectionsTableOffset = __bswap_32(elfFileHeader.e_shoff);
+	int headerSectionsTableOffset = elfFileHeader.e_shoff;
 	
-
-	// Place le curseur du stream à l'emplacement du tableau d'enetêtes de sections
+	// Place le curseur du stream à l'emplacement du tableau d'entêtes de sections
 	fseek(elfFile, headerSectionsTableOffset, SEEK_SET);
-
+	
+	int offset = elfFileHeader.e_shoff + elfFileHeader.e_shstrndx*elfFileHeader.e_shentsize;
+	
+	fseek(elfFile, offset, SEEK_SET);
+	fseek(elfFile, 16, SEEK_CUR );
+	fread( &offset, 4, 1, elfFile );
+	offset = __bswap_32(offset);
+	
 	// Affichage du nom des colonnes de données
-	printf("%4s %8s %16s %8s %6s %6s %2s %3s\n", "[Nr]", "Nom",	"Type",	"Adr", "Décala.", "Taille",	"ES", "Fan");
-
-	// Passage de la notation big endian à little endian du nombre de sections
-	int sectionsCount = __bswap_16(elfFileHeader.e_shnum);
+	printf("%4s %20s %16s %8s %6s %6s %2s %3s %2s %3s %2s\n", "[Nr]", "Nom",	"Type",	"Adr", "Décala.", "Taille",	"ES", "Fan", "LN", "Inf", "Al");
+	
+	int sectionsCount = elfFileHeader.e_shnum;
 	int s_index;
-	// Lecture de chaque section et affichage
 	for(s_index = 0; s_index < sectionsCount; s_index++)
 	{
+		// Mets le curseur sur l'entête de la section courante
+		fseek(elfFile, headerSectionsTableOffset + sizeof(elfSectionHeader) * s_index, SEEK_SET);
+		
 		// Lecture de l'entête de la section
-		fread(&elfSectionHeader, 1, sizeof(elfSectionHeader), elfFile);
+		fread(&elfSectionHeader, sizeof(elfSectionHeader), 1, elfFile);
+
+		// Swap des valeurs de la structure
+		bytes_swap_section_header(&elfSectionHeader);
+
+		// *** Obtiention du nom de la section ***
+		fseek(elfFile, offset + elfSectionHeader.sh_name, SEEK_SET);
+		char name[256];
+		fscanf(elfFile, "%255s", name);
+		// ***************************************
+		
+		
+		// Obtient les symboles définissant les FLAGS
+		char* flagsSymb = sh_flags(elfSectionHeader.sh_flags);
 
 		// Affichage des données de l'entête de la section courante
 		// 		Nr 	  Nom  Type  Adr  Décala. Taille ES Fan LN Inf Al
-		printf("[%2d] %08x %16s %08d %06x %06x %02x %3s\n", 
+		printf("[%2d] %20s %16s %08d %06x %06x %02x %3s %2d %3d %2d\n", 
 		s_index,
-		elfSectionHeader.sh_name, // Obtenir le nom depuis le tableau de chaînes
-		sh_type(__bswap_32(elfSectionHeader.sh_type)),
+		name,
+		sh_type(elfSectionHeader.sh_type),
 		elfSectionHeader.sh_addr,
-		__bswap_32(elfSectionHeader.sh_offset),
-		__bswap_32(elfSectionHeader.sh_size),
-		__bswap_32(elfSectionHeader.sh_entsize),
-		sh_flags(__bswap_32(elfSectionHeader.sh_flags)));
+		elfSectionHeader.sh_offset,
+		elfSectionHeader.sh_size,
+		elfSectionHeader.sh_entsize,
+		flagsSymb,
+		elfSectionHeader.sh_link,
+		elfSectionHeader.sh_info,
+		elfSectionHeader.sh_addralign);
+		
+		// Libére la mémoire utilisée par la chaîne de symboles
+		free(flagsSymb);
 	}
 }
