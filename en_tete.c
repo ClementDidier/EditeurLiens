@@ -44,7 +44,6 @@ void creation_en_tete(FILE* ElfFile){
 
 	// ecriture de e_type
 	
-	elfHdr.e_type = __bswap_16(elfHdr.e_type);
 	switch(elfHdr.e_type){
 		case ET_NONE :
 			printf("Type : No file type");
@@ -75,12 +74,10 @@ void creation_en_tete(FILE* ElfFile){
 	printf(" \n");
 
 	// ecriture de e_machine
-	elfHdr.e_machine = __bswap_16(elfHdr.e_machine);
 
 	printf(" \n");
 
 	// ecriture de e_version
-	elfHdr.e_version = __bswap_32(elfHdr.e_version);
 	switch(elfHdr.e_version){
 		case 0 :
 			printf("Version : %d (Invalide Version)\n",elfHdr.e_version);
@@ -91,31 +88,24 @@ void creation_en_tete(FILE* ElfFile){
 	}
 
 	// ecriture de e_entry
-	elfHdr.e_entry = __bswap_32(elfHdr.e_entry);
 	printf("Entry point address : 0x%x\n",elfHdr.e_entry);
 
 	// ecriture de e_phoff
-	elfHdr.e_phoff = __bswap_32(elfHdr.e_phoff);
 	printf("Phoff : %d\n", elfHdr.e_phoff);
 
 	// ecriture de e_shoff
-	elfHdr.e_shoff = __bswap_32(elfHdr.e_shoff);
 	printf("Shoff : %d\n", elfHdr.e_shoff);
 
 	// ecriture de e_flags
-	elfHdr.e_flags = __bswap_32(elfHdr.e_flags);
 	printf("Flags : 0x%x\n",elfHdr.e_flags);
 
 	// ecriture de e_shentsize
-	elfHdr.e_shentsize = __bswap_16(elfHdr.e_shentsize);
 	printf("Taille de section headers : %d (bytes)\n",elfHdr.e_shentsize);
 
 	// ecriture de e_shnum
-	elfHdr.e_shnum = __bswap_16(elfHdr.e_shnum);
 	printf("Nombre de section headers : %d\n",elfHdr.e_shnum);
 
 	// ecriture de e_shstrndx
-	elfHdr.e_shstrndx = __bswap_16(elfHdr.e_shstrndx);
 	printf("L'index de la table des section headers : %d\n",elfHdr.e_shstrndx);
 }
 
