@@ -1,6 +1,11 @@
 #ifndef __EN_TETE__
 #define __EN_TETE__
 
+#include <elf.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <byteswap.h>
+#include "API.h"
 
 /*
 	Permet d'afficher l'en-tête du fichier ElfFile :

@@ -1,19 +1,16 @@
-#include <elf.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <byteswap.h>
 #include "en_tete.h"
+
 
 
 void creation_en_tete(FILE* ElfFile){
 
 	// enregistrement de la structure de donnee elfhdr
 
-	 Elf32_Ehdr elfHdr;
-	//fread(&elfHdr, 1, sizeof elfHdr, ElfFile);
-
-	
+	Elf32_Ehdr elfHdr;
 	int i;
+
+	// avant d'utiliser l'API :
+	/*
 	for(i=0;i<16;i++){
 		fread(&elfHdr.e_ident[i], 1, 1, ElfFile);
 	}
@@ -62,7 +59,11 @@ void creation_en_tete(FILE* ElfFile){
 
 		printf("erreur dans le codage utilisé");
 	}
-	
+	*/
+
+	read_Elf32_Ehdr(ElfFile, &elfHdr);
+
+	//Utilisation de l'API
 
 	// ecriture de e_ident (Magique)
 	printf("e_ident : ");
