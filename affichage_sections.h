@@ -1,6 +1,12 @@
 #ifndef __AFFICHAGE_SECTIONS__
 #define __AFFICHAGE_SECTIONS__
 
+#include <elf.h>
+#include <stdio.h>
+#include <byteswap.h>
+#include <string.h>
+#include <stdlib.h>
+
 char* sh_type(Elf32_Word typeData);
 
 char* sh_flags(Elf32_Word flagsData);

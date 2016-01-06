@@ -3,6 +3,7 @@
 #include <elf.h>
 #include <ctype.h>
 #include <byteswap.h>
+#include <string.h>
 
 #define N 144
 
@@ -10,10 +11,10 @@
 
 //Procédure de lecture de l'en tête en tenant compte du big endian 
 void bytes_swap_elfHeader(Elf32_Ehdr *elfHeader){
-	elfHeader->e_shnum = __bswap_16(elfHeader->e_shnum); printf("elfHeader->e_shnum = %d\n",elfHeader->e_shnum);
-	elfHeader->e_shoff = __bswap_32(elfHeader->e_shoff);printf("elfHeader->e_shoff = %d\n",elfHeader->e_shoff);
-	elfHeader->e_shentsize = __bswap_16(elfHeader->e_shentsize);printf("elfHeader->e_shentsize = %d\n",elfHeader->e_shentsize);
-	elfHeader->e_shstrndx = __bswap_16(elfHeader->e_shstrndx);printf("elfHeader->e_shstrndx = %d\n",elfHeader->e_shstrndx);
+	elfHeader->e_shnum = __bswap_16(elfHeader->e_shnum);
+	elfHeader->e_shoff = __bswap_32(elfHeader->e_shoff);
+	elfHeader->e_shentsize = __bswap_16(elfHeader->e_shentsize);
+	elfHeader->e_shstrndx = __bswap_16(elfHeader->e_shstrndx);
 }
 
 //Procédure de lecture du section header en tenant compte du big endian
@@ -78,7 +79,7 @@ int main(int argc, char *argv[]) {
 				fseek( elf_file, elfHeader.e_shoff + elfHeader.e_shstrndx*elfHeader.e_shentsize, SEEK_SET );
 				fseek( elf_file, 16, SEEK_CUR );
 				fread( &base, 4, 1, elf_file );
-				base = __bswap_32( base ); 
+				base = __bswap_32( base );
 
 				int index_nom=elfSections.sh_name;
 				char strg[N];
@@ -98,26 +99,52 @@ int main(int argc, char *argv[]) {
 			else{
 				char name[N],strg[N];
 				strcpy(name,argv[2]);
-				int i,base;
+				int i,offset,base,size,index_nom;
 
 				
 				//On récupère le ELF_header
 				Elf32_Ehdr elfHeader;				
 				fread(&elfHeader,1,sizeof(Elf32_Ehdr),elf_file);
-				bytes_swap_elfHeader(&elfHeader);			
+				bytes_swap_elfHeader(&elfHeader);		
 				
 				//Trouver le header de la section de nom donné
 				i=0;				
-				while(i<elfHeader.sh_num && strcmp(name,strg)!=0){
-					fseek( elf_file, elfHeader.e_shoff+ i*elfHeader.e_shentsize , SEEK_SET );
+				while(i<elfHeader.e_shnum && strcmp(name,strg)!=0){
+					fseek( elf_file, elfHeader.e_shoff + i*elfHeader.e_shentsize , SEEK_SET );
+					fread(&index_nom, 4,1,elf_file);
+					index_nom = __bswap_32( index_nom);
+			
+					fseek( elf_file, elfHeader.e_shoff + elfHeader.e_shstrndx*elfHeader.e_shentsize, SEEK_SET );
+					fseek( elf_file, 16, SEEK_CUR );
+					fread( &base, 4, 1, elf_file );
+					base = __bswap_32( base );
+					fseek(elf_file, base + index_nom, SEEK_SET );
 					fscanf(elf_file,"%143s", strg);
+	
 					i++;
 					printf("\n%s",strg);
 				}
 
-				
+				if(strcmp(name,strg)==0){
+					i--;
+					fseek( elf_file, elfHeader.e_shoff + i*elfHeader.e_shentsize +16 , SEEK_SET );
+					
+					fread(&offset,4,1,elf_file);
+					fread(&size,4,1,elf_file);
+					offset = __bswap_32(offset);
+					size = __bswap_32(size);
 
-
+					if(size==0){
+						printf("Section '%s' has no data to dump\n",strg);
+					}
+					else{
+						fseek(elf_file,offset,SEEK_SET);
+						ecrire_contenu(elf_file,strg,size);
+					}
+				}
+				else{
+					printf("\nWarning section %s does not exist\n",name);
+				}				
 			}	
 		}
 		else{

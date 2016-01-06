@@ -1,8 +1,4 @@
-#include <elf.h>
-#include <stdio.h>
-#include <byteswap.h>
-#include <string.h>
-#include <stdlib.h>
+#include "affichage_sections.h"
 
 char* sh_type(Elf32_Word typeData)
 {
