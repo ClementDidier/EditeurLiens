@@ -1,5 +1,6 @@
 #include "affichage_reimplant.h"
 
+
 void creation_reimplantation(FILE* elfFile){
 	
 	Elf32_Rel elfRel;
@@ -26,7 +27,7 @@ void creation_reimplantation(FILE* elfFile){
 	int sectionsCount = elfFileHeader.e_shnum;
 	int s_index;
 
-	// Lecture de chaque section et affichage
+	// Lecture de chaque section de relocation et affichage
 	for(s_index = 0; s_index < sectionsCount; s_index++)
 	{
 
@@ -42,20 +43,17 @@ void creation_reimplantation(FILE* elfFile){
 
 		// sans l'API
 		//fseek(elfFile, headerSectionsTableOffset + sizeof(elfSectionHeader) * s_index, SEEK_SET);
-		// Lecture de l'entête de la section
 		//fread(&elfSectionHeader, 1, sizeof(elfSectionHeader), elfFile);
 
 		//Avec l'API
 		read_Elf32_Shdr(elfFile, elfFileHeader, s_index, &elfSectionHeader);
 
 		if(elfSectionHeader.sh_type == SHT_REL){
-			fseek(elfFile, elfSectionHeader.sh_offset, SEEK_SET);
 			printf("Section de relocation : %s à l'adresse de décalage : 0x%x :\n", name,elfSectionHeader.sh_offset );
-			int size;
-			for(size=0; size < elfSectionHeader.sh_size; size += sizeof(Elf32_Rel)){
-				fread(&elfRel, 1, sizeof(Elf32_Rel), elfFile);
-				elfRel.r_offset = __bswap_32(elfRel.r_offset);
-				elfRel.r_info = __bswap_32(elfRel.r_info);
+			int taille;
+			// lecture et affichage de chaque relocation pour une section
+			for(taille=0; taille < (elfSectionHeader.sh_size)/(sizeof(Elf32_Rel)); taille ++){
+				read_Elf32_Rel(elfFile, &elfRel, taille, elfSectionHeader);
 				printf("Offset : 0x%x",elfRel.r_offset);
 				printf("     Info : 0x%x\n",elfRel.r_info );
 			}
@@ -63,14 +61,10 @@ void creation_reimplantation(FILE* elfFile){
 
 
 		}else if(elfSectionHeader.sh_type == SHT_RELA){
-			elfSectionHeader.sh_offset = __bswap_32(elfSectionHeader.sh_offset);
-			fseek(elfFile, elfSectionHeader.sh_offset, SEEK_SET);
-			elfSectionHeader.sh_size = __bswap_32(elfSectionHeader.sh_size);
+			printf("Section de relocation : %s à l'adresse de décalage : 0x%x :\n", name,elfSectionHeader.sh_offset );
 			int size;
-			for(size=0; size < elfSectionHeader.sh_size; size += sizeof(Elf32_Rela)){
-				fread(&elfRela, 1, sizeof(Elf32_Rela), elfFile);
-				elfRela.r_offset = __bswap_32(elfRela.r_offset);
-				elfRela.r_info = __bswap_32(elfRela.r_info);
+			for(size=0; size < (elfSectionHeader.sh_size)/(sizeof(Elf32_Rela)); size ++ ){
+				read_Elf32_Rela(elfFile, &elfRela, size, elfSectionHeader);
 				printf("Offset : 0x%x",elfRela.r_offset);
 				printf("   Info : 0x%x",elfRela.r_info );
 				printf("   Addent : 0x%x\n",elfRela.r_addend );

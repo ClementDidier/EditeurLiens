@@ -119,4 +119,38 @@ void afficher_Shdr_list( ){
 }
 
 
+// Lis une structure Elf32_Rel (lis une ligne du tableau de relocation)
+// Renvoie le nombre d'octets lus 
+int read_Elf32_Rel( FILE *f, Elf32_Rel *r, int indice, Elf32_Shdr s)
+{
+	unsigned long int size = sizeof(Elf32_Rel);
+	fseek(f, s.sh_offset, SEEK_SET);
+	fseek(f, indice*sizeof(Elf32_Rel), SEEK_CUR);
+	fread(r, sizeof(Elf32_Rel), 1,f);
+
+	// Inversion big/little sur les champs de plus d'un octet 
+	l2b_endian_32( (unsigned int *)&(r->r_offset));
+	l2b_endian_32( (unsigned int *)&(r->r_info));
+	return size;
+}
+
+
+// Lis une structure Elf32_Rela (lis une ligne du tableau de relocation)
+// Renvoie le nombre d'octets lus 
+int read_Elf32_Rela( FILE *f, Elf32_Rela *ra, int indice, Elf32_Shdr s)
+{
+	unsigned long int size = sizeof(Elf32_Rela);
+	fseek(f, s.sh_offset, SEEK_SET);
+	fseek(f, indice*sizeof(Elf32_Rela), SEEK_CUR);
+	fread(ra, sizeof(Elf32_Rela), 1, f);
+
+	// Inversion big/little sur les champs de plus d'un octet 
+	l2b_endian_32( (unsigned int *)&(ra->r_offset));
+	l2b_endian_32( (unsigned int *)&(ra->r_info));
+	l2b_endian_32( (unsigned int *)&(ra->r_addend));
+	return size;
+}
+
+
+
 

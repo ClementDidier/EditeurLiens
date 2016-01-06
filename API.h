@@ -33,6 +33,10 @@ int read_Elf32_Sym( FILE *f, Elf32_Sym *s );
 // Construit l'ensemble des Shdr :
 void read_Shdr_list( FILE *f );
 void afficher_Shdr_list();
+// Lis une structure Elf32_Rela (lis une ligne du tableau de relocation)
+int read_Elf32_Rela( FILE *f, Elf32_Rela *ra, int indice, Elf32_Shdr s);
+// Lis une structure Elf32_Rel (lis une ligne du tableau de relocation)
+int read_Elf32_Rel( FILE *f, Elf32_Rel *r, int indice, Elf32_Shdr s);
 
 
 #endif
