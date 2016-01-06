@@ -1,28 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <elf.h>
-#include <ctype.h>
-#include <byteswap.h>
-#include <string.h>
-
-#define N 144
-
-
-
-//Procédure de lecture de l'en tête en tenant compte du big endian 
-void bytes_swap_elfHeader(Elf32_Ehdr *elfHeader){
-	elfHeader->e_shnum = __bswap_16(elfHeader->e_shnum);
-	elfHeader->e_shoff = __bswap_32(elfHeader->e_shoff);
-	elfHeader->e_shentsize = __bswap_16(elfHeader->e_shentsize);
-	elfHeader->e_shstrndx = __bswap_16(elfHeader->e_shstrndx);
-}
-
-//Procédure de lecture du section header en tenant compte du big endian
-void bytes_swap_elfSections(Elf32_Shdr *elfSections){
-	elfSections->sh_name = __bswap_32(elfSections->sh_name);
-	elfSections->sh_offset = __bswap_32(elfSections->sh_offset);
-	elfSections->sh_size = __bswap_32(elfSections->sh_size);
-}
+#include "contenu_sections.h"
 
 //Procédure d'écriture du contenu de la section
 void ecrire_contenu(FILE *f,char strg[N],int size){
@@ -47,15 +23,13 @@ int main(int argc, char *argv[]) {
 		if((elf_file = fopen(argv[1],"r"))!= NULL){
 		
 			if(isdigit(argv[2][0])){
-				int index,offset,size, base;
+				unsigned int index,offset,size, base;
 
 				index = atoi(argv[2]);
-
 				//On récupère le ELF_header
 				Elf32_Ehdr elfHeader;				
-				fread(&elfHeader,1,sizeof(Elf32_Ehdr),elf_file);
-				bytes_swap_elfHeader(&elfHeader);			
-				
+				read_Elf32_Ehdr(elf_file,&elfHeader);
+
 				//On vérifie que la section recherchée existe avant de continuer
 				if(index>elfHeader.e_shnum){
 					printf("Warning section %d does not exit\n",index);
@@ -68,8 +42,7 @@ int main(int argc, char *argv[]) {
 			
 				//On récupère le header de la section
 				Elf32_Shdr elfSections;				
-				fread(&elfSections,1,sizeof(Elf32_Shdr),elf_file);
-				bytes_swap_elfSections(&elfSections);
+				read_Elf32_Shdr(elf_file,elfHeader,index,&elfSections);
 
 				//On récupère l'offset de la section demandée, et sa taille
 				offset = elfSections.sh_offset;
@@ -79,14 +52,13 @@ int main(int argc, char *argv[]) {
 				fseek( elf_file, elfHeader.e_shoff + elfHeader.e_shstrndx*elfHeader.e_shentsize, SEEK_SET );
 				fseek( elf_file, 16, SEEK_CUR );
 				fread( &base, 4, 1, elf_file );
-				base = __bswap_32( base );
+				l2b_endian_32( &base );
 
-				int index_nom=elfSections.sh_name;
+				unsigned int index_nom=elfSections.sh_name;
 				char strg[N];
 				
 				fseek(elf_file, base + index_nom, SEEK_SET );
 				fscanf(elf_file,"%143s", strg);
-				printf("\n%s\n",strg);
 				//Si la taille de la section est zero on ne cherche pas à écrire son contenu
 				if(size==0){
 					printf("Section '%s' has no data to dump\n",strg);
@@ -99,30 +71,28 @@ int main(int argc, char *argv[]) {
 			else{
 				char name[N],strg[N];
 				strcpy(name,argv[2]);
-				int i,offset,base,size,index_nom;
+				unsigned int i,offset,base,size,index_nom;
 
 				
 				//On récupère le ELF_header
 				Elf32_Ehdr elfHeader;				
-				fread(&elfHeader,1,sizeof(Elf32_Ehdr),elf_file);
-				bytes_swap_elfHeader(&elfHeader);		
-				
+				read_Elf32_Ehdr(elf_file,&elfHeader);
+
 				//Trouver le header de la section de nom donné
 				i=0;				
 				while(i<elfHeader.e_shnum && strcmp(name,strg)!=0){
 					fseek( elf_file, elfHeader.e_shoff + i*elfHeader.e_shentsize , SEEK_SET );
 					fread(&index_nom, 4,1,elf_file);
-					index_nom = __bswap_32( index_nom);
+					l2b_endian_32( &index_nom);
 			
 					fseek( elf_file, elfHeader.e_shoff + elfHeader.e_shstrndx*elfHeader.e_shentsize, SEEK_SET );
 					fseek( elf_file, 16, SEEK_CUR );
 					fread( &base, 4, 1, elf_file );
-					base = __bswap_32( base );
+					l2b_endian_32( &base );
 					fseek(elf_file, base + index_nom, SEEK_SET );
 					fscanf(elf_file,"%143s", strg);
 	
 					i++;
-					printf("\n%s",strg);
 				}
 
 				if(strcmp(name,strg)==0){
@@ -131,8 +101,8 @@ int main(int argc, char *argv[]) {
 					
 					fread(&offset,4,1,elf_file);
 					fread(&size,4,1,elf_file);
-					offset = __bswap_32(offset);
-					size = __bswap_32(size);
+					l2b_endian_32(&offset);
+					l2b_endian_32(&size);
 
 					if(size==0){
 						printf("Section '%s' has no data to dump\n",strg);
