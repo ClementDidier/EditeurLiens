@@ -84,17 +84,25 @@ int read_Elf32_Sym( FILE *f, Elf32_Sym *s)
 }
 
 
+// Lecture de l'ensemble des Section Headers  
+
 void read_Shdr_list( FILE *f )
 {
 	Elf32_Ehdr h;
-	int i = 0;
+	int i;
 	Shdr_list *L = malloc( sizeof(Shdr_list) ), *Q = L, *N;
 	L->next = NULL;
 	read_Elf32_Ehdr(f, &h);
 	read_Elf32_Shdr(f, h, 0, &(L->header));
 	for( i = 1; i < h.e_shnum; i++ ){
 		N = malloc( sizeof(Shdr_list) );
+		// Lecture du header
 		read_Elf32_Shdr(f, h, i, &(N->header));
+		// Lecture du dump raw de la section
+		fseek( f, N->header.sh_offset, SEEK_SET );
+		N->dump = malloc( N->header.sh_size );
+		fread( N->dump, N->header.sh_size, 1, f); 
+		// Passage a la section suivante 
 		Q->next = N;
 		Q = N;
 		N->next = NULL;
@@ -103,21 +111,90 @@ void read_Shdr_list( FILE *f )
 	
 }
 
-void afficher_Shdr( Elf32_Shdr s){
-	printf("SECTION HEADER :\n\tsh_name : %d\n\tsh_type : %d\n\tsh_addr : %d\n\tsh_offset : %d\n\tsh_size : %d\n\tsh_entsize : %d\n\tsh_flags : %d\n\tsh_link : %d\n\tsh_info : %d\n\tsh_addralign : %d\n", 
-		 s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);	
-	
+void afficher_Shdr( Shdr_list *L){
+	Elf32_Shdr s = L->header;
+	int i;
+	printf("  [+]Header\n\tsh_name : %d\n\tsh_type : %d\n\tsh_addr : %d\n\tsh_offset : %d\n\tsh_size : %d\n\tsh_entsize : %d\n\tsh_flags : %d\n\tsh_link : %d\n\tsh_info : %d\n\tsh_addralign : %d\n",  s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);	
+	printf("  [+] Content\n\t");
+	for( i = 0; i < L->header.sh_size; i++ ){
+		printf("%.02x", (unsigned char)(L->dump[i]));
+	}
+	printf("\n");
 }
 
 void afficher_Shdr_list( ){
+	int i = 0;
 	Shdr_list * L = shdr_list;
 	printf(" Liste des section headers : \n");
 	while( L != NULL ){
-		afficher_Shdr(L->header);
+		printf(" Section [%d] :\n",i++);
+		afficher_Shdr(L);
 		L = L->next;
 	}
 }
 
+// Lecture de l'ensemble des symboles 
+void read_Sym_list( FILE *f ){
+	unsigned int tmp;
+	unsigned int shentsize, shoff;
+	unsigned int symtab_off = 0, strtab_off = 0, symtab_size = 0; 
+	unsigned int strtab_index, size, i;
+		
+	// Lecture des informations sur la table des section headers ( offset, taille d'un header, nombre de header )
+	fseek( f, 32, SEEK_SET );	// 32 = offset du champs e_shoff 
+	fread( &shoff, 4, 1, f ); l2b_endian_32( &shoff );	
+	fseek( f, 44, SEEK_SET );	// 44 = offset du champs e_shentsize
+	fread( &tmp, 4, 1, f ); l2b_endian_32( &tmp );
+	shentsize = ( tmp & 0xFFFF ); 
+	fseek( f, 46, SEEK_SET );	// 46 = offset du champs e_shnum
+	fread( &tmp, 4, 1, f ); l2b_endian_32( &tmp );
+	
+	// Recherche dans les headers de celui de .symtab
+	fseek( f, shoff, SEEK_SET );
+	// Pour chaque header on regarde si c'est le bon ( i.e si son type correspond a SHT_SYMTAB )
+	while( (symtab_off == 0 || strtab_off == 0 )){
+		fseek( f, 4, SEEK_CUR );
+		fread( &tmp, 4, 1, f ); l2b_endian_32( &tmp );
+		if ( tmp == SHT_SYMTAB ){
+			// On a trouve le header de la table des symboles
+			// Lecture des infos 
+			fseek( f, 8, SEEK_CUR );
+			fread( &symtab_off, 4, 1, f ); l2b_endian_32( &symtab_off );
+			fread( &symtab_size, 4, 1, f ); l2b_endian_32( &symtab_size );
+			// Lecture de l'index dans la table des headers de la table des strings associee : .strtab 
+			fread( &strtab_index, 4, 1, f ); l2b_endian_32( &strtab_index );
+			// Deplacement du descripteur de fichier vers le header de .strtab
+			fseek( f, shoff + shentsize*strtab_index, SEEK_SET );
+			fseek( f, 16, SEEK_CUR );
+			// Lecture de son offset 
+			fread( &strtab_off, 4, 1, f ); l2b_endian_32( &strtab_off );
+		}else{
+			fseek( f, 8*sizeof(Elf32_Word), SEEK_CUR );
+		}
+	} 
+	
+	// Lecture de la table des symboles un par un : 
+	fseek( f, symtab_off, SEEK_SET );
+	size = symtab_size / sizeof(Elf32_Sym);
+	sym_list.nb = size;
+	sym_list.list = malloc( size * sizeof(Elf32_Sym) );
+	for( i = 0; i < size; i++ )
+		read_Elf32_Sym( f, &(sym_list.list[i]) );
+}
+
+
+void afficher_Sym( Elf32_Sym S ){
+	printf("\tname : %d \tvalue : %d \tsize : %d \tinfo : %d \tother : %d \tshndx : %d\n",
+	S.st_name, S.st_value, S.st_size, S.st_info, S.st_other, S.st_shndx);  
+}
+
+void afficher_Sym_list(){
+	int i;
+	for( i = 0; i < sym_list.nb; i++ ){
+		printf("Symbole [%d] : \n", i);
+		afficher_Sym( sym_list.list[i] );
+	}
+}
 
 // Lis une structure Elf32_Rel (lis une ligne du tableau de relocation)
 // Renvoie le nombre d'octets lus 
