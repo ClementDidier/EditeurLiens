@@ -173,6 +173,7 @@ void creation_en_tete(FILE* ElfFile){
 			break;
 
 	}
+	printf("\n");
 
 	// ecriture de e_version
 	switch(elfHdr.e_version){
