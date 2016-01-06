@@ -4,6 +4,16 @@
 
 #include <elf.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+// Structures de données
+typedef struct Shdr_list Shdr_list;
+struct Shdr_list{
+	Elf32_Shdr header;
+	Shdr_list * next;
+};
+
+Shdr_list *shdr_list;
 
 // Fonctions d'inversion d'endianness little->big ou big->little
 // Travaillent directement sur la mémoire 
@@ -20,6 +30,9 @@ int read_Elf32_Ehdr( FILE *f, Elf32_Ehdr * h );
 int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s);
 // Lis une structure Elf32_Sym
 int read_Elf32_Sym( FILE *f, Elf32_Sym *s );
+// Construit l'ensemble des Shdr :
+void read_Shdr_list( FILE *f );
+void afficher_Shdr_list();
 
 
 #endif
