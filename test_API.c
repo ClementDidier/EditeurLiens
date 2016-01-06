@@ -27,6 +27,10 @@ int main(int argc, char * argv[])
 	
 	printf("SECTION HEADER [%d] :\n\tsh_name : %d\n\tsh_type : %d\n\tsh_addr : %d\n\tsh_offset : %d\n\tsh_size : %d\n\tsh_entsize : %d\n\tsh_flags : %d\n\tsh_link : %d\n\tsh_info : %d\n\tsh_addralign : %d\n", 
 		s_index, s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);
+		
+		
+	read_Shdr_list( f );
+	afficher_Shdr_list();
 	
 	return 0;
 }

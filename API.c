@@ -71,7 +71,7 @@ int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s)
 
 // Lis une structure Elf32_Sym
 // Renvoie le nombre d'octets lus 
-int read_Elf32_Sym( FILE *f, Elf32_Sym *s )
+int read_Elf32_Sym( FILE *f, Elf32_Sym *s)
 {
 	unsigned long int size = sizeof(Elf32_Sym);
 	fread( s, size , 1, f);
@@ -83,6 +83,40 @@ int read_Elf32_Sym( FILE *f, Elf32_Sym *s )
 	return size;
 }
 
+
+void read_Shdr_list( FILE *f )
+{
+	Elf32_Ehdr h;
+	int i = 0;
+	Shdr_list *L = malloc( sizeof(Shdr_list) ), *Q = L, *N;
+	L->next = NULL;
+	read_Elf32_Ehdr(f, &h);
+	read_Elf32_Shdr(f, h, 0, &(L->header));
+	for( i = 1; i < h.e_shnum; i++ ){
+		N = malloc( sizeof(Shdr_list) );
+		read_Elf32_Shdr(f, h, i, &(N->header));
+		Q->next = N;
+		Q = N;
+		N->next = NULL;
+	}
+	shdr_list = L;
+	
+}
+
+void afficher_Shdr( Elf32_Shdr s){
+	printf("SECTION HEADER :\n\tsh_name : %d\n\tsh_type : %d\n\tsh_addr : %d\n\tsh_offset : %d\n\tsh_size : %d\n\tsh_entsize : %d\n\tsh_flags : %d\n\tsh_link : %d\n\tsh_info : %d\n\tsh_addralign : %d\n", 
+		 s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);	
+	
+}
+
+void afficher_Shdr_list( ){
+	Shdr_list * L = shdr_list;
+	printf(" Liste des section headers : \n");
+	while( L != NULL ){
+		afficher_Shdr(L->header);
+		L = L->next;
+	}
+}
 
 
 
