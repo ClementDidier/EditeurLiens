@@ -16,10 +16,12 @@ void creation_reimplantation(FILE* elfFile){
 	Elf32_Shdr elfSectionHeader;
 
 	// Lecture de l'entête du fichier .ELF
-	fread(&elfFileHeader, 1, sizeof(Elf32_Ehdr), elfFile);
+
+	fread(&elfFileHeader, sizeof(Elf32_Ehdr), 1, elfFile);
+	elfFileHeader.e_shoff = __bswap_32(elfFileHeader.e_shoff);
 	
 	// Offset du tableau d'entête de sections
-	int headerSectionsTableOffset = __bswap_32(elfFileHeader.e_shoff);
+	int headerSectionsTableOffset = elfFileHeader.e_shoff;
 	
 
 	// Place le curseur du stream à l'emplacement du tableau d'enetêtes de sections
@@ -31,27 +33,55 @@ void creation_reimplantation(FILE* elfFile){
 	// Lecture de chaque section et affichage
 	for(s_index = 0; s_index < sectionsCount; s_index++)
 	{
+
+		//recuperation du nom :
+		int offset = elfFileHeader.e_shoff + __bswap_16(elfFileHeader.e_shstrndx)*__bswap_16(elfFileHeader.e_shentsize);
+		fseek(elfFile, offset, SEEK_SET);
+		fseek(elfFile, 16, SEEK_CUR );
+		fread( &offset, 4, 1, elfFile );
+		offset = __bswap_32(offset);
+		fseek(elfFile, offset + __bswap_32(elfSectionHeader.sh_name), SEEK_SET);
+		char name[256];
+		fscanf(elfFile, "%255s", name);
+
+
+		fseek(elfFile, headerSectionsTableOffset + sizeof(elfSectionHeader) * s_index, SEEK_SET);
 		// Lecture de l'entête de la section
 		fread(&elfSectionHeader, 1, sizeof(elfSectionHeader), elfFile);
 
-	 	// Obtenir le nom depuis le tableau de chaînes
+
 		elfSectionHeader.sh_type = __bswap_32(elfSectionHeader.sh_type);
 		if(elfSectionHeader.sh_type == SHT_REL){
 			elfSectionHeader.sh_offset = __bswap_32(elfSectionHeader.sh_offset);
 			fseek(elfFile, elfSectionHeader.sh_offset, SEEK_SET);
-			fread(&elfRel, 1, sizeof(Elf32_Rel), elfFile);
-			elfRel.r_offset = __bswap_32(elfRel.r_offset);
-			elfRel.r_info = __bswap_32(elfRel.r_info);
-			printf("Offset : 0x%x\n",elfRel.r_offset);
-			printf("Info : 0x%x\n",elfRel.r_info );
+			elfSectionHeader.sh_size = __bswap_32(elfSectionHeader.sh_size);
+			printf("Section de relocation : %s à l'adresse de décalage : 0x%x :\n", name,elfSectionHeader.sh_offset );
+			int size;
+			for(size=0; size < elfSectionHeader.sh_size; size += sizeof(Elf32_Rel)){
+				fread(&elfRel, 1, sizeof(Elf32_Rel), elfFile);
+				elfRel.r_offset = __bswap_32(elfRel.r_offset);
+				elfRel.r_info = __bswap_32(elfRel.r_info);
+				printf("Offset : 0x%x",elfRel.r_offset);
+				printf("     Info : 0x%x\n",elfRel.r_info );
+			}
+			printf("\n");
+
+
 		}else if(elfSectionHeader.sh_type == SHT_RELA){
 			elfSectionHeader.sh_offset = __bswap_32(elfSectionHeader.sh_offset);
 			fseek(elfFile, elfSectionHeader.sh_offset, SEEK_SET);
-			fread(&elfRela, 1, sizeof(Elf32_Rela), elfFile);
-			elfRela.r_offset = __bswap_32(elfRela.r_offset);
-			elfRela.r_info = __bswap_32(elfRela.r_info);
-			printf("Offset : 0x%x\n",elfRela.r_offset);
-			printf("Info : 0x%x\n",elfRela.r_info );
+			elfSectionHeader.sh_size = __bswap_32(elfSectionHeader.sh_size);
+			int size;
+			for(size=0; size < elfSectionHeader.sh_size; size += sizeof(Elf32_Rela)){
+				fread(&elfRela, 1, sizeof(Elf32_Rela), elfFile);
+				elfRela.r_offset = __bswap_32(elfRela.r_offset);
+				elfRela.r_info = __bswap_32(elfRela.r_info);
+				printf("Offset : 0x%x",elfRela.r_offset);
+				printf("   Info : 0x%x",elfRela.r_info );
+				printf("   Addent : 0x%x\n",elfRela.r_addend );
+			}
+			printf("\n");
+
 		}
 		
 	}
