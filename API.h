@@ -17,7 +17,7 @@ void l2b_endian_16( unsigned int * val );
 // Lis le header du fichier ELF
 int read_Elf32_Ehdr( FILE *f, Elf32_Ehdr * h );
 // Lis un header de section 
-int read_Elf32_Shdr( FILE *f, Elf32_Shdr * h );
+int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s);
 // Lis une structure Elf32_Sym
 int read_Elf32_Sym( FILE *f, Elf32_Sym *s );
 

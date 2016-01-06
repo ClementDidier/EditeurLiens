@@ -1,10 +1,9 @@
 #include "API.h"
 
-
-
 // Fonctions d'inversion d'endianness little->big ou big->little
 // Travaillent directement sur la mémoire 
-void l2b_endian_32( unsigned int * val ){
+void l2b_endian_32( unsigned int * val )
+{
 	uint32_t b0,b1,b2,b3;
 	uint32_t num = *val;
 	b0 = (num & 0x000000ff) << 24u;
@@ -14,7 +13,8 @@ void l2b_endian_32( unsigned int * val ){
 	*val = b0 | b1 | b2 | b3;
 }
 
-void l2b_endian_16( unsigned int * val ){
+void l2b_endian_16( unsigned int * val )
+{
 	uint32_t b0,b1,b2,b3;
 	uint32_t num = *val;
 	b0 = (num & 0x000000ff) << 8u;
@@ -27,8 +27,10 @@ void l2b_endian_16( unsigned int * val ){
 
 // Fonctions de lecture des valeurs codees en big endian vers une architecture little endian 
 // Lis le header du fichier ELF
-int read_Elf32_Ehdr( FILE *f, Elf32_Ehdr * h ){
+int read_Elf32_Ehdr( FILE *f, Elf32_Ehdr * h )
+{
 	unsigned long int size = sizeof(Elf32_Ehdr);
+	fseek(f, 0, SEEK_SET);
 	fread( h, size , 1, f);
 	// Inversion de l'endianess 
 	l2b_endian_16((unsigned int * )&(h->e_type));
@@ -48,25 +50,29 @@ int read_Elf32_Ehdr( FILE *f, Elf32_Ehdr * h ){
 }
 
 // Lis un header de section 
-int read_Elf32_Shdr( FILE *f, Elf32_Shdr * h ){
+int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s)
+{
 	unsigned long int size = sizeof(Elf32_Shdr);
-	fread( h, size , 1, f);
+	fseek(f, h.e_shoff + size * index, SEEK_SET);
+	fread(s, size, 1, f);
 	// Inversion de l'endianess 
-	l2b_endian_32((unsigned int * )&(h->sh_name));
-	l2b_endian_32((unsigned int * )&(h->sh_type));
-	l2b_endian_32((unsigned int * )&(h->sh_flags));
-	l2b_endian_32((unsigned int * )&(h->sh_addr));
-	l2b_endian_32((unsigned int * )&(h->sh_offset));
-	l2b_endian_32((unsigned int * )&(h->sh_size));
-	l2b_endian_32((unsigned int * )&(h->sh_link));
-	l2b_endian_32((unsigned int * )&(h->sh_info));
-	l2b_endian_32((unsigned int * )&(h->sh_addralign));
-	l2b_endian_32((unsigned int * )&(h->sh_entsize));
+	l2b_endian_32((unsigned int * )&(s->sh_name));
+	l2b_endian_32((unsigned int * )&(s->sh_type));
+	l2b_endian_32((unsigned int * )&(s->sh_flags));
+	l2b_endian_32((unsigned int * )&(s->sh_addr));
+	l2b_endian_32((unsigned int * )&(s->sh_offset));
+	l2b_endian_32((unsigned int * )&(s->sh_size));
+	l2b_endian_32((unsigned int * )&(s->sh_link));
+	l2b_endian_32((unsigned int * )&(s->sh_info));
+	l2b_endian_32((unsigned int * )&(s->sh_addralign));
+	l2b_endian_32((unsigned int * )&(s->sh_entsize));
+	return size;
 }
 
 // Lis une structure Elf32_Sym
 // Renvoie le nombre d'octets lus 
-int read_Elf32_Sym( FILE *f, Elf32_Sym *s ){
+int read_Elf32_Sym( FILE *f, Elf32_Sym *s )
+{
 	unsigned long int size = sizeof(Elf32_Sym);
 	fread( s, size , 1, f);
 	// Inversion big/little sur les champs de plus d'un octet 
