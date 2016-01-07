@@ -1,52 +1,71 @@
-#include "API.h"
+#include "relocation.h"
 
-// Lis une structure Elf32_Rel (lis une ligne du tableau de relocation)
-// Renvoie le nombre d'octets lus 
-int read_Elf32_Rel( FILE *f, Elf32_Rel *r, int indice, Elf32_Shdr s,)
+
+// prend une structure de type Sdr_list et supprime les sections REL ou RELA
+void enlever_relocation()
 {
-	unsigned long int size = sizeof(Elf32_Rel);
-	fseek(f, s.sh_offset, SEEK_SET);
-	fseek(f, indice*sizeof(Elf32_Rel), SEEK_CUR);
-	fread(r, 1, sizeof(Elf32_Rel), elfFile);
+	Shdr_list * copie = shdr_list;
+	int indice_suppression = 0;
+	int indice_section = 0;
+	int indice_saut = 0;
+	while(copie != NULL){
 
-	// Inversion big/little sur les champs de plus d'un octet 
-	l2b_endian_32( (unsigned int *)&(r->offset));
-	l2b_endian_32( (unsigned int *)&(r->info));
-	return size;
+		if((copie->header.sh_type == SHT_REL) || (copie->header.sh_type == SHT_RELA)){
+			copie = copie->next;
+			indice_suppression++;
+			num_section[indice_section] = -1;
+		}else{
+			if(copie->next !=NULL){
+				if((copie->next->header.sh_type == SHT_REL) || (copie->next->header.sh_type == SHT_RELA)){
+					copie->next = copie->next->next;
+					num_section[indice_section] = -1;
+					indice_suppression++;
+				}
+			}else{
+				num_section[indice_section] = indice_saut;
+				indice_saut++;
+
+			}
+
+			copie = copie->next;
+		}
+		indice_section++;
+	}
+
+	header.e_shnum = header.e_shnum - indice_suppression;
+
 }
 
 
-// Lis une structure Elf32_Rela (lis une ligne du tableau de relocation)
-// Renvoie le nombre d'octets lus 
-int read_Elf32_Rela( FILE *f, Elf32_Rela *ra, int indice, Elf32_Shdr s,)
+void afficher_tableau()
 {
-	unsigned long int size = sizeof(Elf32_Rela);
-	fseek(f, s.sh_offset, SEEK_SET);
-	fseek(f, indice*sizeof(Elf32_Rela), SEEK_CUR);
-	fread(r, 1, sizeof(Elf32_Rela), elfFile);
+	int i;
+	printf("table des sections : \n");
+	for(i = 0; i < ; i++){
+		printf("t");
 
-	// Inversion big/little sur les champs de plus d'un octet 
-	l2b_endian_32( (unsigned int *)&(ra->offset));
-	l2b_endian_32( (unsigned int *)&(ra->info));
-	l2b_endian_32( (unsigned int *)&(ra->addend));
-	return size;
+	}
+
+
+
 }
 
-int main(int argc, char **argv){
-
-	FILE* fichier = fopen(argv[1],"r");
-
- 	Elf32_Ehdr h;
-
-	Elf32_Shdr s;
-
-	Elf32_Rel r;
-
-
-	read_Elf32_Rel(fichier, &h);
-	read_Elf32_Rel(fichier, &s, h);
-	read_Elf32_Rel(fichier, &r, 0, s);
-
+int main(int argc, char * argv[])
+{
+	FILE* f = NULL;
+	if((f = fopen(argv[1], "r")) == NULL)
+	{
+		printf("Erreur lors de la lecture du fichier ELF");
+		return -1;
+	}
+	
+	Elf32_Ehdr h;
+	
+	read_Elf32_Ehdr(f, &h);
+	read_Shdr_list( f );
+	enlever_relocation(shdr_list);
+	afficher_Shdr_list();
+	
+	fclose(f);
 	return 0;
-
 }
