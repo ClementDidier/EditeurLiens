@@ -154,7 +154,7 @@ void afficher_Shdr( Shdr_list *L){
 	printf("\n");
 }
 
-void afficher_Shdr_list( ){
+void afficher_Shdr_list(){
 	int i = 0;
 	Shdr_list * L = shdr_list;
 	printf(" Liste des section headers : \n");
@@ -272,7 +272,7 @@ void write_Elf32_Ehdr(FILE *f, Elf32_Ehdr h)
 	fwrite(&value16, sizeof(Elf32_Half), 1, f);
 	value16 = __bswap_16(h.e_machine);
 	fwrite(&value16, sizeof(Elf32_Half), 1, f);
-	int16_t value32 = __bswap_32(h.e_version);
+	int32_t value32 = __bswap_32(h.e_version);
 	fwrite(&value32, sizeof(Elf32_Word), 1, f);
 	value32 = __bswap_32(h.e_entry);
 	fwrite(&value32, sizeof(Elf32_Addr), 1, f);
@@ -324,6 +324,34 @@ void write_Elf32_Shdr(FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr s)
 	fwrite(&value, sizeof(Elf32_Word),1, f);
 }
 
+void write_dump( FILE * f,  unsigned char * dump, Elf32_Word size)
+{
+		unsigned int i;
+		for( i = 0; i < (unsigned int)size; i++ )
+			fprintf(f,"%c", dump[i]);
+}
 
+// Ecrit l'ensemble des sections
+void write_Shdr_list( FILE *f)
+{
+	int i = 0;
+	Shdr_list * L = shdr_list;
+	while( L != NULL ){
+		write_dump(f, L->dump, L->header.sh_size);
+		L = L->next;
+	}
+	L = shdr_list;
+	while( L != NULL ){
+		write_Elf32_Shdr(f, header, i, L->header );
+		L = L->next;
+		i++;
+	}
+}
 
-
+Shdr_list * find_section( int num ){
+	Shdr_list * L = shdr_list;
+	int i = 0;
+	for( i = 0; i < num; i++ )
+		L = L->next;
+	return L;
+}
