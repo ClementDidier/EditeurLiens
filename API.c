@@ -171,7 +171,8 @@ void read_Sym_list( FILE *f ){
 	unsigned int shentsize, shoff;
 	unsigned int symtab_off = 0, strtab_off = 0, symtab_size = 0; 
 	unsigned int strtab_index, size, i;
-		
+	
+	sym_list.nb = 0;
 	// Lecture des informations sur la table des section headers ( offset, taille d'un header, nombre de header )
 	fseek( f, 32, SEEK_SET );	// 32 = offset du champs e_shoff 
 	fread( &shoff, 4, 1, f ); l2b_endian_32( &shoff );	
@@ -324,9 +325,10 @@ void write_Elf32_Shdr(FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr s)
 	fwrite(&value, sizeof(Elf32_Word),1, f);
 }
 
-void write_dump( FILE * f,  unsigned char * dump, Elf32_Word size)
+void write_dump( FILE * f,  unsigned char * dump, Elf32_Word size, Elf32_Off offset)
 {
 		unsigned int i;
+		fseek( f, offset , SEEK_SET);
 		for( i = 0; i < (unsigned int)size; i++ )
 			fprintf(f,"%c", dump[i]);
 }
@@ -337,7 +339,7 @@ void write_Shdr_list( FILE *f)
 	int i = 0;
 	Shdr_list * L = shdr_list;
 	while( L != NULL ){
-		write_dump(f, L->dump, L->header.sh_size);
+		write_dump(f, L->dump, L->header.sh_size, L->header.sh_offset);
 		L = L->next;
 	}
 	L = shdr_list;
@@ -355,6 +357,17 @@ Shdr_list * find_section( int num ){
 		L = L->next;
 	return L;
 }
+
+Shdr_list * find_symbols_section(){
+	Shdr_list * L = shdr_list;
+	while( L != NULL ){
+		if ( L->header.sh_type == SHT_SYMTAB )
+			break;
+		L = L->next;
+	}
+	return L;
+}
+
 
 char ** sections_names_table(FILE * f, Elf32_Ehdr h)
 {

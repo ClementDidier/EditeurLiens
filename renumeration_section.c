@@ -4,15 +4,19 @@
 // prend une structure de type Sdr_list et supprime les sections REL ou RELA
 void enlever_relocation()
 {
-	Shdr_list * copie = shdr_list->next, *prec = shdr_list, *copie_rel = NULL;
-	int indice_section = 0;
-	int indice_saut = 0;
+	Shdr_list * copie = shdr_list->next, *prec = shdr_list, *copie_rel = NULL, *L = shdr_list;
+	int indice_section = 1; 
+	int indice_saut = 1;
+	unsigned int removed_size = 0; // Le nombre d'octets qu'on a supprime en enlevant des sections 
 	
 	while(copie != NULL){
 		if(copie->header.sh_type == SHT_REL){
+			printf("-->\n");
 			//enlève cette section de shdr_list
 			prec->next = copie->next;
-			 
+			// et on met a jour le nombre d'octets supprimes 
+			removed_size += (unsigned int)copie->header.sh_size;
+			printf("\tCurrently removed : %08x\n", removed_size );
 			// ajout de la section dans rel_list
 			if(copie_rel ==NULL){
 				copie_rel = copie;
@@ -26,6 +30,10 @@ void enlever_relocation()
 			copie_rel->next = NULL;
 			num_sections[indice_section] = -1;
 		}else{
+			// avancer dans la liste chainee
+			printf("offset %08x becomes :", copie->header.sh_offset);
+			//copie->header.sh_offset -= removed_size;
+			printf(" %08x\n", copie->header.sh_offset);
 			prec = copie;
 			copie = copie->next;
 			num_sections[indice_section] = indice_saut;
@@ -34,25 +42,26 @@ void enlever_relocation()
 		indice_section++;
 
 	}
-
 	num_sections[indice_section] = indice_saut;
-	
-
 	header.e_shnum = indice_saut;
-
+	header.e_shoff -= removed_size; // l'offset de la table des shdr a change car on a supprime des sections ;-) 
+	header.e_shstrndx = num_sections[header.e_shstrndx];
+	header.e_type = ET_EXEC;
+	// mise à jour de l'offset des sections et de sh_link
+	while( L != NULL ){
+		L->header.sh_link = (unsigned int)num_sections[L->header.sh_link];
+		L = L->next;	
+	}	
 }
 
 
-void afficher_tableau()
+void afficher_tableau_sections()
 {
 	int i;
 	printf("table des sections : \n");
 	for(i = 0; i < size_num_sections; i++){
 		printf("table[%d] = %d\n", i, num_sections[i]);
 	}
-
-
-
 }
 
 
