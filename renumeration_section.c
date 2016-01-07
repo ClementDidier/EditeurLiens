@@ -1,4 +1,4 @@
-#include "relocation.h"
+#include "renumeration_section.h"
 
 
 // prend une structure de type Sdr_list et supprime les sections REL ou RELA
