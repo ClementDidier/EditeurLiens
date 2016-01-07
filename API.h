@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <byteswap.h>
+#include <string.h>
 
 // Structures de données
 Elf32_Ehdr header;
@@ -78,8 +79,10 @@ void write_dump( FILE * f,  unsigned char * dump, Elf32_Word size);
 // D'abord les dumps, puis les headers correspondants
 void write_Shdr_list( FILE *f);
 
-
 // Autre : 
 // Renvoie un pointeur vers le debut de la Shdr_list correspondant au numero de section 
 Shdr_list * find_section( int num );
+
+// Obtient la table des strings
+char ** sections_names_table(FILE * f, Elf32_Ehdr h);
 #endif

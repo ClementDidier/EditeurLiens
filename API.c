@@ -355,3 +355,29 @@ Shdr_list * find_section( int num ){
 		L = L->next;
 	return L;
 }
+
+char ** sections_names_table(FILE * f, Elf32_Ehdr h)
+{
+	Elf32_Shdr s;
+	int offset = h.e_shoff + h.e_shstrndx * h.e_shentsize;
+	fseek(f, offset, SEEK_SET);
+	fseek(f, 16, SEEK_CUR );
+	fread( &offset, 4, 1, f );
+	offset = __bswap_32(offset);
+	
+	char ** table = (char**) malloc(h.e_shnum * sizeof(char*));
+	
+	int i = 0;
+	for(; i < h.e_shnum; i++)
+	{
+		table[i] = (char *) malloc(sizeof(char *));
+		read_Elf32_Shdr(f, h, i, &s);
+		fseek(f, offset + s.sh_name, SEEK_SET);
+		char name[256];
+		fscanf(f, "%255s", name);
+		
+		strcpy(table[i], name);
+	}
+	
+	return table;
+}
