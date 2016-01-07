@@ -1,4 +1,4 @@
-#Journal de bord 
+#Journal de projet
 
 Lundi 4 janvier 2015 :
 	
@@ -32,14 +32,14 @@ le travail à faire sur les étapes de la phase 2. Et nous nous sommes munis d'u
 	
 	-Répartition des tâches pour la Phase 2
 		*Alexia et Thaqif : 	implémentation d'une fonction qui étant donné un ensemble de sections, sépare les sections à réimplanter
-									et renumérote le nouvel ensemble de sections obtenu.
+									et renumérote le nouvel ensemble de sections obtenu. (Etape 6)
 		*Clément : implémentation d'une fonction qui écrit dans un fichier, les données contenues dans les type de structures que nous avons définis
 
-		*Boyan et Thibault : Manipulation de la relocation et des symboles.
+		*Boyan et Thibault : Correction des symboles (adresses absolues et mise à jour des sections)
 
-
-
+Jeudi 7 janvier 2015 :
+	-Réalisation de l'étape 6 et 7
+	-Mise à jour de l'API
+		*Ajout de fonctions d'affichages pour les différentes structures de données implémantées. 
+		*Ajout de nouvelles variables globales (pour l'en-tête, la liste des headers de section, et la table de symboles)
 	
-		
-
-Boyan : 0686654380

@@ -6,6 +6,7 @@
 #include <byteswap.h>
 #include <string.h>
 #include <stdlib.h>
+#include "API.h"
 
 char* sh_type(Elf32_Word typeData);
 

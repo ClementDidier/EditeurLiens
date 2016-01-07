@@ -25,8 +25,15 @@ int main(int argc, char * argv[])
 	afficher_Sym_list();
 	read_header( f );
 	afficher_Elf32_Ehdr( header );
-	
-	
+/*	
+	char **table;
+	int i=0;
+	table = sections_names_table(f,h);
+	for(;i<h.e_shnum;i++)
+	{
+		printf("%s\n",table[i]);
+	}	
+*/	
 	fclose(f);
 	return 0;
 }

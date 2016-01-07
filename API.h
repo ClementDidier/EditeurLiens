@@ -6,16 +6,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <byteswap.h>
+#include <string.h>
 
 // Structures de données
-
 Elf32_Ehdr header;
 
 typedef struct Shdr_list Shdr_list;
 struct Shdr_list{
 	Elf32_Shdr header;
 	unsigned char * dump;
-	Elf32_Addr addr;
 	Shdr_list * next;
 };
 
@@ -57,12 +56,6 @@ int read_Elf32_Rela( FILE *f, Elf32_Rela *ra, int indice, Elf32_Shdr s);
 // Lis une structure Elf32_Rel (lis une ligne du tableau de relocation)
 int read_Elf32_Rel( FILE *f, Elf32_Rel *r, int indice, Elf32_Shdr s);
 
-// Ecrit le header dans le stream
-void write_Elf32_Ehdr(FILE *f, Elf32_Ehdr h);
-
-// Ecrit un header de section
-void write_Elf32_Shdr(FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr s);
-
 // Fonctions de construction et affichage de la structure de donnees sur laquelle on va travailler 
 
 // Construit l'ensemble des Sections, une liste chainee de structures qui contient à chaque fois le
@@ -73,4 +66,23 @@ void afficher_Shdr_list();
 void read_Sym_list( FILE *f );
 void afficher_Sym_list();
 
+// Fonction d'ecriture de nos structures vers un fichier ELF resultat 
+
+// Ecrit le header dans le stream
+void write_Elf32_Ehdr(FILE *f, Elf32_Ehdr h);
+// Ecrit un header de section dans un fichier 
+void write_Elf32_Shdr(FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr s);
+// Ecrit un dump de section dans un fichier
+void write_dump( FILE * f,  unsigned char * dump, Elf32_Word size);
+
+// Ecrit l'ensemble des sections
+// D'abord les dumps, puis les headers correspondants
+void write_Shdr_list( FILE *f);
+
+// Autre : 
+// Renvoie un pointeur vers le debut de la Shdr_list correspondant au numero de section 
+Shdr_list * find_section( int num );
+
+// Obtient la table des strings
+char ** sections_names_table(FILE * f, Elf32_Ehdr h);
 #endif
