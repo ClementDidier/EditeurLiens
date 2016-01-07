@@ -118,16 +118,15 @@ void afficher_table_sections(FILE* elfFile)
 	Elf32_Shdr elfSectionHeader;
 
 	// Lecture de l'entête du fichier .ELF
-	fread(&elfFileHeader, sizeof(Elf32_Ehdr), 1, elfFile);
-	
+	//fread(&elfFileHeader, sizeof(Elf32_Ehdr), 1, elfFile);
 	// Swap les valeurs de la structure
-	bytes_swap_file_header(&elfFileHeader);
+	//bytes_swap_file_header(&elfFileHeader);
+	read_Elf32_Ehdr(elfFile, &elfFileHeader);
 	
 	// Offset du tableau d'entête de sections
-	int headerSectionsTableOffset = elfFileHeader.e_shoff;
-	
+	//int headerSectionsTableOffset = elfFileHeader.e_shoff;
 	// Place le curseur du stream à l'emplacement du tableau d'entêtes de sections
-	fseek(elfFile, headerSectionsTableOffset, SEEK_SET);
+	//fseek(elfFile, headerSectionsTableOffset, SEEK_SET);
 	
 	int offset = elfFileHeader.e_shoff + elfFileHeader.e_shstrndx*elfFileHeader.e_shentsize;
 	
@@ -137,22 +136,21 @@ void afficher_table_sections(FILE* elfFile)
 	offset = __bswap_32(offset);
 	
 	// Affichage du nom des colonnes de données
-	printf("%4s %20s %16s %8s %6s %6s %2s %3s %2s %3s %2s\n", "[Nr]", "Nom",	"Type",	"Adr", "Décala.", "Taille",	"ES", "Fan", "LN", "Inf", "Al");
+	printf("%4s %20s %16s %8s %6s %6s %2s %3s %2s %3s %2s\n", "[Nr]", "Nom", "Type", "Adr", "Décala.", "Taille", "ES", "Fan", "LN", "Inf", "Al");
 	
 	int sectionsCount = elfFileHeader.e_shnum;
 	int s_index;
 	for(s_index = 0; s_index < sectionsCount; s_index++)
 	{
 		// Mets le curseur sur l'entête de la section courante
-		fseek(elfFile, headerSectionsTableOffset + sizeof(elfSectionHeader) * s_index, SEEK_SET);
-		
+		//fseek(elfFile, headerSectionsTableOffset + sizeof(elfSectionHeader) * s_index, SEEK_SET);
 		// Lecture de l'entête de la section
-		fread(&elfSectionHeader, sizeof(elfSectionHeader), 1, elfFile);
-
+		//fread(&elfSectionHeader, sizeof(elfSectionHeader), 1, elfFile);
 		// Swap des valeurs de la structure
-		bytes_swap_section_header(&elfSectionHeader);
+		//bytes_swap_section_header(&elfSectionHeader);
+		read_Elf32_Shdr(elfFile, elfFileHeader, s_index, &elfSectionHeader);
 
-		// *** Obtiention du nom de la section ***
+		// *** Obtention du nom de la section ***
 		fseek(elfFile, offset + elfSectionHeader.sh_name, SEEK_SET);
 		char name[256];
 		fscanf(elfFile, "%255s", name);
