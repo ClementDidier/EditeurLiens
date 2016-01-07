@@ -10,4 +10,8 @@
 void enlever_relocation();
 
 
+//affiche le tableau num_sections (très util pour faire de tests)
+void afficher_tableau();
+
+
 #endif
