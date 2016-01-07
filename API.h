@@ -15,6 +15,7 @@ typedef struct Shdr_list Shdr_list;
 struct Shdr_list{
 	Elf32_Shdr header;
 	unsigned char * dump;
+	Elf32_Addr addr;
 	Shdr_list * next;
 };
 
