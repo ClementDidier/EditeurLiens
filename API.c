@@ -1,5 +1,6 @@
 #include "API.h"
 
+
 // Fonctions d'inversion d'endianness little->big ou big->little
 // Travaillent directement sur la mémoire 
 void l2b_endian_32( unsigned int * val )
@@ -26,6 +27,34 @@ void l2b_endian_16( unsigned int * val )
 
 
 // Fonctions de lecture des valeurs codees en big endian vers une architecture little endian 
+int read_header( FILE *f ){
+	Elf32_Ehdr *h = &header;
+	unsigned long int size = sizeof(Elf32_Ehdr);
+	int i;
+	fseek(f, 0, SEEK_SET);
+	fread( h, size , 1, f);
+	// Inversion de l'endianess 
+	l2b_endian_16((unsigned int * )&(h->e_type));
+	l2b_endian_16((unsigned int * )&(h->e_machine));
+    l2b_endian_32((unsigned int * )&(h->e_version));
+    l2b_endian_32((unsigned int * )&(h->e_entry));
+    l2b_endian_32((unsigned int * )&(h->e_phoff));
+    l2b_endian_32((unsigned int * )&(h->e_shoff));
+    l2b_endian_32((unsigned int * )&(h->e_flags));
+	l2b_endian_16((unsigned int * )&(h->e_ehsize));
+	l2b_endian_16((unsigned int * )&(h->e_phentsize));
+	l2b_endian_16((unsigned int * )&(h->e_phnum));
+	l2b_endian_16((unsigned int * )&(h->e_shentsize));
+	l2b_endian_16((unsigned int * )&(h->e_shnum));
+	l2b_endian_16((unsigned int * )&(h->e_shstrndx));
+	
+	num_sections = malloc( (h->e_shnum)*sizeof(int) );
+	size_num_sections = h->e_shnum;
+	for( i = 0; i < size_num_sections ; i++)
+		num_sections[i] = i;
+	return size;
+}
+
 // Lis le header du fichier ELF
 int read_Elf32_Ehdr( FILE *f, Elf32_Ehdr * h )
 {
@@ -48,7 +77,10 @@ int read_Elf32_Ehdr( FILE *f, Elf32_Ehdr * h )
 	l2b_endian_16((unsigned int * )&(h->e_shstrndx));
 	return size;
 }
-
+void afficher_Elf32_Ehdr( Elf32_Ehdr h ){
+	printf("HEADER  : \n\te_type : %d\n\te_machine : %d\n\te_version : %d\n\te_entry : %d\n\te_phoff : %d\n\te_shoff : %d\n\te_flags : %d\n\te_ehsize : %d\n\te_phentsize : %d\n\te_phnum : %d\n\te_shentsize : %d\n\te_shnum : %d\n\te_shstrndx : %d\n\n",
+		h.e_type, h.e_machine, h.e_version, h.e_entry, h.e_phoff, h.e_shoff, h.e_flags, h.e_ehsize, h.e_phentsize, h.e_phnum, h.e_shentsize, h.e_shnum, h.e_shstrndx);	
+}
 // Lis un header de section 
 int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s)
 {
@@ -226,6 +258,70 @@ int read_Elf32_Rela( FILE *f, Elf32_Rela *ra, int indice, Elf32_Shdr s)
 	l2b_endian_32( (unsigned int *)&(ra->r_info));
 	l2b_endian_32( (unsigned int *)&(ra->r_addend));
 	return size;
+}
+
+// Ecrit le header dans le stream
+void write_Elf32_Ehdr(FILE *f, Elf32_Ehdr h)
+{
+	// Attention Offsets & attributs non renseignés
+	fseek(f, 0, SEEK_SET);
+	
+	fwrite(h.e_ident, sizeof(unsigned char), EI_NIDENT, f);
+	
+	int16_t value16 = __bswap_16(h.e_type);
+	fwrite(&value16, sizeof(Elf32_Half), 1, f);
+	value16 = __bswap_16(h.e_machine);
+	fwrite(&value16, sizeof(Elf32_Half), 1, f);
+	int16_t value32 = __bswap_32(h.e_version);
+	fwrite(&value32, sizeof(Elf32_Word), 1, f);
+	value32 = __bswap_32(h.e_entry);
+	fwrite(&value32, sizeof(Elf32_Addr), 1, f);
+	value32 = __bswap_32(h.e_phoff);
+	fwrite(&value32, sizeof(Elf32_Off), 1, f);
+	value32 = __bswap_32(h.e_shoff);
+	fwrite(&value32, sizeof(Elf32_Off), 1, f);
+	value32 = __bswap_32(h.e_flags);
+	fwrite(&value32, sizeof(Elf32_Word), 1, f);
+	value16 = __bswap_16(h.e_ehsize);
+	fwrite(&value16, sizeof(Elf32_Half), 1, f);
+	value16 = __bswap_16(h.e_phentsize);
+	fwrite(&value16, sizeof(Elf32_Half), 1, f);
+	value16 = __bswap_16(h.e_phnum);
+	fwrite(&value16, sizeof(Elf32_Half), 1, f);
+	value16 = __bswap_16(h.e_shentsize);
+	fwrite(&value16, sizeof(Elf32_Half), 1, f);
+	value16 = __bswap_16(h.e_shnum);
+	fwrite(&value16, sizeof(Elf32_Half), 1, f);
+	value16 = __bswap_16(h.e_shstrndx);
+	fwrite(&value16, sizeof(Elf32_Half), 1, f);
+}
+
+// Ecrit un header de section
+void write_Elf32_Shdr(FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr s)
+{
+	unsigned long int size = sizeof(Elf32_Shdr);
+	fseek(f, h.e_shoff + size * index, SEEK_SET);
+	
+	int32_t value = __bswap_32(s.sh_name);
+	fwrite(&value, sizeof(Elf32_Word), 1, f);
+	value = __bswap_32(s.sh_type);
+	fwrite(&value, sizeof(Elf32_Word), 1, f);
+	value = __bswap_32(s.sh_flags);
+	fwrite(&value, sizeof(Elf32_Word),1, f);
+	value = __bswap_32(s.sh_addr);
+	fwrite(&value, sizeof(Elf32_Addr),1, f);
+	value = __bswap_32(s.sh_offset);
+	fwrite(&value, sizeof(Elf32_Off), 1, f);
+	value = __bswap_32(s.sh_size);
+	fwrite(&value, sizeof(Elf32_Word), 1, f);
+	value = __bswap_32(s.sh_link);
+	fwrite(&value, sizeof(Elf32_Word), 1, f);
+	value = __bswap_32(s.sh_info);
+	fwrite(&value, sizeof(Elf32_Word), 1,f);
+	value = __bswap_32(s.sh_addralign);
+	fwrite(&value, sizeof(Elf32_Word), 1,f);
+	value = __bswap_32(s.sh_entsize);
+	fwrite(&value, sizeof(Elf32_Word),1, f);
 }
 
 

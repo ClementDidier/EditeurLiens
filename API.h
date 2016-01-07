@@ -5,8 +5,12 @@
 #include <elf.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <byteswap.h>
 
 // Structures de données
+
+Elf32_Ehdr header;
+
 typedef struct Shdr_list Shdr_list;
 struct Shdr_list{
 	Elf32_Shdr header;
@@ -15,6 +19,10 @@ struct Shdr_list{
 };
 
 Shdr_list *shdr_list;
+Shdr_list *rel_list;
+
+int *num_sections;
+int size_num_sections;
 
 typedef struct Sym_list Sym_list;
 struct Sym_list{
@@ -33,8 +41,11 @@ void l2b_endian_16( unsigned int * val );
 // Fonctions de lecture des valeurs codees en big endian vers une architecture little endian 
 // Ces fonctions renvoient le nombre d'octets lus ( le plus souvent )
 
-// Lis le header du fichier ELF
+// Lis le header dans la variable globale
+int read_header( FILE *f );
+// Lis le header du fichier ELF dans une structure 
 int read_Elf32_Ehdr( FILE *f, Elf32_Ehdr * h );
+void afficher_Elf32_Ehdr( Elf32_Ehdr h );
 // Lis un header de section 
 int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s);
 // Lis une structure Elf32_Sym
@@ -44,6 +55,12 @@ int read_Elf32_Sym( FILE *f, Elf32_Sym *s );
 int read_Elf32_Rela( FILE *f, Elf32_Rela *ra, int indice, Elf32_Shdr s);
 // Lis une structure Elf32_Rel (lis une ligne du tableau de relocation)
 int read_Elf32_Rel( FILE *f, Elf32_Rel *r, int indice, Elf32_Shdr s);
+
+// Ecrit le header dans le stream
+void write_Elf32_Ehdr(FILE *f, Elf32_Ehdr h);
+
+// Ecrit un header de section
+void write_Elf32_Shdr(FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr s);
 
 // Fonctions de construction et affichage de la structure de donnees sur laquelle on va travailler 
 
