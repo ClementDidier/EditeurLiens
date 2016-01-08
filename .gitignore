@@ -32,3 +32,9 @@
 
 # Debug files
 *.dSYM/
+
+test_API
+test_API_read
+test_API_write
+contenu_sections
+test_affichage_sections
