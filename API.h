@@ -63,6 +63,7 @@ int read_Elf32_Rel( FILE *f, Elf32_Rel *r, int indice, Elf32_Shdr s);
 void read_Shdr_list( FILE *f );
 void afficher_Shdr_list();
 void afficher_Shdr( Shdr_list *L);
+void afficher_rel_list();
 
 void read_Sym_list( FILE *f );
 void afficher_Sym_list();

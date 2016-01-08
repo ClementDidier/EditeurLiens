@@ -3,7 +3,8 @@
 
 int main(int argc, char * argv[])
 {
-	FILE* f = NULL, *fres = NULL;
+	FILE* f = NULL; 
+	//FILE*fres = NULL;
 	if((f = fopen(argv[1], "r")) == NULL)
 	{
 		printf("Erreur lors de la lecture du fichier ELF");
@@ -20,15 +21,15 @@ int main(int argc, char * argv[])
 		header.e_type, header.e_machine, header.e_version, header.e_entry, header.e_phoff, header.e_shoff, header.e_flags, header.e_ehsize, header.e_phentsize, header.e_phnum, header.e_shentsize, header.e_shnum, header.e_shstrndx);
 		
 	// Affichage a l'ecran 
-	//afficher_Shdr_list(shdr_list);
-	//afficher_Shdr_list(rel_list);
+	afficher_Shdr_list();
+	afficher_rel_list();
 	afficher_tableau_sections();
 	
 	// Correction des symboles : 
 	//correction_symboles();
 	
 	// Ecriture dans un fichier 
-	
+/*
 	if((fres = fopen("elfres.exe", "w")) == NULL)
 	{
 		printf("Erreur lors de la lecture du fichier ELF");
@@ -40,5 +41,6 @@ int main(int argc, char * argv[])
 	
 	fclose(f);
 	fclose(fres);
+*/
 	return 0;
 }

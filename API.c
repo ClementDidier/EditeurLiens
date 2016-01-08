@@ -164,6 +164,17 @@ void afficher_Shdr_list(){
 		L = L->next;
 	}
 }
+void afficher_rel_list(){
+	int i = 0;
+	Shdr_list * L = rel_list;
+	printf(" Liste des section headers : \n");
+	while( L != NULL ){
+		printf(" Section [%d] :\n",i++);
+		afficher_Shdr(L);
+		L = L->next;
+	}
+}
+
 
 // Lecture de l'ensemble des symboles 
 void read_Sym_list( FILE *f ){
