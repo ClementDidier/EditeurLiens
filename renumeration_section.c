@@ -11,12 +11,10 @@ void enlever_relocation()
 	
 	while(copie != NULL){
 		if(copie->header.sh_type == SHT_REL){
-			printf("-->\n");
 			//enlève cette section de shdr_list
 			prec->next = copie->next;
 			// et on met a jour le nombre d'octets supprimes 
 			removed_size += (unsigned int)copie->header.sh_size;
-			printf("\tCurrently removed : %08x\n", removed_size );
 			// ajout de la section dans rel_list
 			if(copie_rel ==NULL){
 				copie_rel = copie;
@@ -31,9 +29,6 @@ void enlever_relocation()
 			num_sections[indice_section] = -1;
 		}else{
 			// avancer dans la liste chainee
-			printf("offset %08x becomes :", copie->header.sh_offset);
-			//copie->header.sh_offset -= removed_size;
-			printf(" %08x\n", copie->header.sh_offset);
 			prec = copie;
 			copie = copie->next;
 			num_sections[indice_section] = indice_saut;

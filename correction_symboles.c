@@ -15,6 +15,7 @@ void correction_symboles(){
 	for(i=0;i<sym_list.nb;i++){
 		// Re-indexation des sections correspondants au symbole
 		sym_list.list[i].st_shndx = num_sections[sym_list.list[i].st_shndx];
+		/* DEBUG !!!! */  sym_list.list[i].st_value += 100;
 		// Calcul de la valeur du symbole, i.e son adresse qui vaut offset + adresse de chargement de sa section correspondante 
 		L = find_section((unsigned int)sym_list.list[i].st_shndx);
 		sym_list.list[i].st_value += L->header.sh_addr;
