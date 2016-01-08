@@ -33,8 +33,13 @@
 # Debug files
 *.dSYM/
 
+Test
+arm_simulator
 test_API
 test_API_read
 test_API_write
+test_read
+test_renumeration
 contenu_sections
+correction_symboles
 test_affichage_sections
