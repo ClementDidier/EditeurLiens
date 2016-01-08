@@ -164,6 +164,7 @@ void afficher_Shdr_list(){
 		L = L->next;
 	}
 }
+
 void afficher_rel_list(){
 	int i = 0;
 	Shdr_list * L = rel_list;
@@ -174,7 +175,6 @@ void afficher_rel_list(){
 		L = L->next;
 	}
 }
-
 
 // Lecture de l'ensemble des symboles 
 void read_Sym_list( FILE *f ){
@@ -237,6 +237,59 @@ void afficher_Sym_list(){
 	for( i = 0; i < sym_list.nb; i++ ){
 		printf("Symbole [%d] : \n", i);
 		afficher_Sym( sym_list.list[i] );
+	}
+}
+
+// Charge le contenu de la section donnée dans une structure de données personnalisée
+void read_Elf32_Shdr_Content(Shdr_list *s, unsigned int index, Elf32_Shdr_Content * cp)
+{
+	// TODO : A tester
+	Shdr_list *sc = s;
+	Elf32_Shdr_Content *c;
+	
+	c = cp;
+	int i;
+	for(i = 0; i < index; i++)
+	{
+		sc = sc->next;
+	}
+	
+	int j, k;
+	for(j = 0; j < sc->header.sh_size; j+=8)
+	{
+		c->offset = 0;
+		
+		for(k = 0; k < 4; k++)
+		{
+			c->offset <<= 8;
+			c->offset |= sc->dump[j+k];
+			 
+			c->info <<= 8;
+			c->info |= sc->dump[j+k+4];
+		}
+		
+		c->sym = ELF32_R_SYM(c->info);
+		c->type = ELF32_R_TYPE(c->info);
+		
+		if(j+8 < sc->header.sh_size)
+		{
+			c->next = malloc(sizeof(Elf32_Shdr_Content));
+			c = c->next;
+		}
+	}
+	c->next = NULL;
+}
+
+void afficher_Elf32_Shdr_Content(Elf32_Shdr_Content c)
+{
+	Elf32_Shdr_Content *cp = &c;
+	while(cp != NULL)
+	{
+		printf("\tOffset : %08x\n", cp->offset);
+		printf("\tInfo : %08x\n", cp->info);
+		printf("\tSym : %06x\n", cp->sym);
+		printf("\tType : %02d\n", cp->type);
+		cp = cp->next;
 	}
 }
 

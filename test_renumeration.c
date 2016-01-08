@@ -3,7 +3,7 @@
 
 int main(int argc, char * argv[])
 {
-	FILE* f = NULL, *fres = NULL;
+	FILE* f = NULL; //*fres = NULL;
 	if((f = fopen(argv[1], "r")) == NULL)
 	{
 		printf("Erreur lors de la lecture du fichier ELF");
@@ -20,6 +20,13 @@ int main(int argc, char * argv[])
 	printf("[+]Séparation des sections de relocation (.rel) ...\n");
 	enlever_relocation();
 		
+	
+	Elf32_Shdr_Content *c;
+	c = malloc(sizeof(Elf32_Shdr_Content));
+	read_Elf32_Shdr_Content(rel_list,2,c);
+	
+	afficher_Elf32_Shdr_Content(*c);
+	/*
 	// Affichage a l'ecran 
 	//afficher_Shdr_list(shdr_list);
 	//afficher_Shdr_list(rel_list);
@@ -40,10 +47,10 @@ int main(int argc, char * argv[])
 	printf("[+]Création du fichier elf executable 'elfres.exe'...\n");
 	write_Elf32_Ehdr( fres, header );
 	write_Shdr_list( fres );
-	
-	fclose(f);
+	*/
+	fclose(f);/*
 	fclose(fres);
 	
-	printf("[-]Transformation terminee, le resultat peut etre observe via 'readelf [opt] elfres.exe' \n\n");
+	printf("[-]Transformation terminee, le resultat peut etre observe via 'readelf [opt] elfres.exe' \n\n"); */
 	return 0;
 }
