@@ -54,8 +54,13 @@ void creation_reimplantation(FILE* elfFile){
 			// lecture et affichage de chaque relocation pour une section
 			for(taille=0; taille < (elfSectionHeader.sh_size)/(sizeof(Elf32_Rel)); taille ++){
 				read_Elf32_Rel(elfFile, &elfRel, taille, elfSectionHeader);
-				printf("Offset : 0x%x",elfRel.r_offset);
-				printf("     Info : 0x%x\n",elfRel.r_info );
+				// Affichage du nom des colonnes de données
+				printf("%16s %16s %16s %16s\n","Offset(hex)","Info","Index","Type");
+				printf("%16x %16x %16d %16d\n",elfRel.r_offset,elfRel.r_info,ELF32_R_SYM(elfRel.r_info),ELF32_R_TYPE(elfRel.r_info));
+				//printf("Offset : 0x%x\n",elfRel.r_offset);
+				//printf("Info : 0x%x\n",elfRel.r_info );
+				//printf("L'index de l'entree dans la table de symbol : %d\n",ELF32_R_SYM(elfRel.r_info));
+				//printf("Type  de reimplantation: %d\n",ELF32_R_TYPE(elfRel.r_info));
 			}
 			printf("\n");
 
