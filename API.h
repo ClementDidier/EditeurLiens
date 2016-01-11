@@ -96,6 +96,10 @@ void afficher_Elf32_Shdr_Content(Elf32_Shdr_Content c);
 // *************************************************************************************************************
 // ***************** Fonction d'ecriture de nos structures vers un fichier ELF resultat ************************
 // *************************************************************************************************************
+
+inline void fwrite_value16(FILE * f, Elf32_Ehdr h, int value, int size);
+inline void fwrite_value32(FILE * f, Elf32_Ehdr h, int value, int size);
+
 // Ecrit le header dans le stream
 void write_Elf32_Ehdr(FILE *f, Elf32_Ehdr h);
 // Ecrit un header de section dans un fichier 

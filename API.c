@@ -358,40 +358,39 @@ int read_Elf32_Rela( FILE *f, Elf32_Ehdr h, Elf32_Rela *ra, int indice, Elf32_Sh
 	return size;
 }
 
+inline void fwrite_value16(FILE * f, Elf32_Ehdr h, int value, int size)
+{
+	int16_t v = recuperer_valeur16(h, value);
+	fwrite(&v, size, 1, f);
+}
+
+inline void fwrite_value32(FILE * f, Elf32_Ehdr h, int value, int size)
+{
+	int16_t v = recuperer_valeur32(h, value);
+	fwrite(&v, size, 1, f);
+}
+
 // Ecrit le header dans le stream
 void write_Elf32_Ehdr(FILE *f, Elf32_Ehdr h)
 {
 	// Attention Offsets & attributs non renseignés
-	fseek(f, 0, SEEK_SET);
+	rewind(f);
 	
 	fwrite(h.e_ident, sizeof(unsigned char), EI_NIDENT, f);
 	
-	int16_t value16 = __bswap_16(h.e_type);
-	fwrite(&value16, sizeof(Elf32_Half), 1, f);
-	value16 = __bswap_16(h.e_machine);
-	fwrite(&value16, sizeof(Elf32_Half), 1, f);
-	int32_t value32 = __bswap_32(h.e_version);
-	fwrite(&value32, sizeof(Elf32_Word), 1, f);
-	value32 = __bswap_32(h.e_entry);
-	fwrite(&value32, sizeof(Elf32_Addr), 1, f);
-	value32 = __bswap_32(h.e_phoff);
-	fwrite(&value32, sizeof(Elf32_Off), 1, f);
-	value32 = __bswap_32(h.e_shoff);
-	fwrite(&value32, sizeof(Elf32_Off), 1, f);
-	value32 = __bswap_32(h.e_flags);
-	fwrite(&value32, sizeof(Elf32_Word), 1, f);
-	value16 = __bswap_16(h.e_ehsize);
-	fwrite(&value16, sizeof(Elf32_Half), 1, f);
-	value16 = __bswap_16(h.e_phentsize);
-	fwrite(&value16, sizeof(Elf32_Half), 1, f);
-	value16 = __bswap_16(h.e_phnum);
-	fwrite(&value16, sizeof(Elf32_Half), 1, f);
-	value16 = __bswap_16(h.e_shentsize);
-	fwrite(&value16, sizeof(Elf32_Half), 1, f);
-	value16 = __bswap_16(h.e_shnum);
-	fwrite(&value16, sizeof(Elf32_Half), 1, f);
-	value16 = __bswap_16(h.e_shstrndx);
-	fwrite(&value16, sizeof(Elf32_Half), 1, f);
+	fwrite_value16(f, h, h.e_type, sizeof(Elf32_Half));
+	fwrite_value16(f, h, h.e_machine, sizeof(Elf32_Half));
+	fwrite_value32(f, h, h.e_version, sizeof(Elf32_Word));
+	fwrite_value32(f, h, h.e_entry, sizeof(Elf32_Addr));
+	fwrite_value32(f, h, h.e_phoff, sizeof(Elf32_Off));
+	fwrite_value32(f, h, h.e_shoff, sizeof(Elf32_Off));
+	fwrite_value32(f, h, h.e_flags, sizeof(Elf32_Word));
+	fwrite_value16(f, h, h.e_ehsize, sizeof(Elf32_Half));
+	fwrite_value16(f, h, h.e_phentsize, sizeof(Elf32_Half));
+	fwrite_value16(f, h, h.e_phnum, sizeof(Elf32_Half));
+	fwrite_value16(f, h, h.e_shentsize, sizeof(Elf32_Half));
+	fwrite_value16(f, h, h.e_shnum, sizeof(Elf32_Half));
+	fwrite_value16(f, h, h.e_shstrndx, sizeof(Elf32_Half));
 }
 
 // Ecrit un header de section
@@ -400,26 +399,16 @@ void write_Elf32_Shdr(FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr s)
 	unsigned long int size = sizeof(Elf32_Shdr);
 	fseek(f, h.e_shoff + size * index, SEEK_SET);
 	
-	int32_t value = __bswap_32(s.sh_name);
-	fwrite(&value, sizeof(Elf32_Word), 1, f);
-	value = __bswap_32(s.sh_type);
-	fwrite(&value, sizeof(Elf32_Word), 1, f);
-	value = __bswap_32(s.sh_flags);
-	fwrite(&value, sizeof(Elf32_Word),1, f);
-	value = __bswap_32(s.sh_addr);
-	fwrite(&value, sizeof(Elf32_Addr),1, f);
-	value = __bswap_32(s.sh_offset);
-	fwrite(&value, sizeof(Elf32_Off), 1, f);
-	value = __bswap_32(s.sh_size);
-	fwrite(&value, sizeof(Elf32_Word), 1, f);
-	value = __bswap_32(s.sh_link);
-	fwrite(&value, sizeof(Elf32_Word), 1, f);
-	value = __bswap_32(s.sh_info);
-	fwrite(&value, sizeof(Elf32_Word), 1,f);
-	value = __bswap_32(s.sh_addralign);
-	fwrite(&value, sizeof(Elf32_Word), 1,f);
-	value = __bswap_32(s.sh_entsize);
-	fwrite(&value, sizeof(Elf32_Word),1, f);
+	fwrite_value32(f, h, s.sh_name, sizeof(Elf32_Word));
+	fwrite_value32(f, h, s.sh_type, sizeof(Elf32_Word));
+	fwrite_value32(f, h, s.sh_flags, sizeof(Elf32_Word));
+	fwrite_value32(f, h, s.sh_addr, sizeof(Elf32_Addr));
+	fwrite_value32(f, h, s.sh_offset, sizeof(Elf32_Off));
+	fwrite_value32(f, h, s.sh_size, sizeof(Elf32_Word));
+	fwrite_value32(f, h, s.sh_link, sizeof(Elf32_Word));
+	fwrite_value32(f, h, s.sh_info, sizeof(Elf32_Word));
+	fwrite_value32(f, h, s.sh_addralign, sizeof(Elf32_Word));
+	fwrite_value32(f, h, s.sh_entsize, sizeof(Elf32_Word));
 }
 
 void write_dump( FILE * f,  unsigned char * dump, Elf32_Word size, Elf32_Off offset)
@@ -435,12 +424,14 @@ void write_Shdr_list(FILE * f, Elf32_Ehdr h, Shdr_list * l)
 {
 	int i = 0;
 	Shdr_list * L = l;
-	while( L != NULL ){
+	while( L != NULL )
+	{
 		write_dump(f, L->dump, L->header.sh_size, L->header.sh_offset);
 		L = L->next;
 	}
 	L = l;
-	while( L != NULL ){
+	while( L != NULL )
+	{
 		write_Elf32_Shdr(f, h, i, L->header );
 		L = L->next;
 		i++;
