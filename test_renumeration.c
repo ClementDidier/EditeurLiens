@@ -12,10 +12,14 @@ int main(int argc, char * argv[])
 	
 	printf("[+]Lecture du fichier elf...\n");
 	
+	Elf32_Ehdr header;
+	Shdr_list shdr_list;
+	Sym_list sym_list;
+	
 	// Lecture dans le ficheir 
-	read_header(f);
-	read_Shdr_list( f );
-	read_Sym_list( f );
+	read_Elf32_Ehdr(f, &header);
+	read_Shdr_list(f, header, &shdr_list);
+	read_Sym_list(f, header, &sym_list);
 	
 	// Suppression des sections de relocation 
 	printf("[+]Séparation des sections de relocation (.rel) ...\n");
@@ -39,8 +43,8 @@ int main(int argc, char * argv[])
 	}
 	
 	printf("[+]Création du fichier elf executable 'elfres.exe'...\n");
-	write_Elf32_Ehdr( fres, header );
-	write_Shdr_list( fres );
+	write_Elf32_Ehdr(fres, header);
+	write_Shdr_list(fres, header, &shdr_list);
 	
 	fclose(f);
 	fclose(fres);

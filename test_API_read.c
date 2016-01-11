@@ -11,20 +11,20 @@ int main(int argc, char * argv[])
 		return -1;
 	}
 	
-	Elf32_Ehdr h;
+	Elf32_Ehdr header;
+	Shdr_list shdr_list;
+	//Shdr_list *rel_list;
+	Sym_list sym_list; 
 	
-	read_Elf32_Ehdr(f, &h);
-
-	printf("HEADER  : \n\te_type : %d\n\te_machine : %d\n\te_version : %d\n\te_entry : %d\n\te_phoff : %d\n\te_shoff : %d\n\te_flags : %d\n\te_ehsize : %d\n\te_phentsize : %d\n\te_phnum : %d\n\te_shentsize : %d\n\te_shnum : %d\n\te_shstrndx : %d\n\n",
-		h.e_type, h.e_machine, h.e_version, h.e_entry, h.e_phoff, h.e_shoff, h.e_flags, h.e_ehsize, h.e_phentsize, h.e_phnum, h.e_shentsize, h.e_shnum, h.e_shstrndx);
+	read_Elf32_Ehdr(f, &header);
+	afficher_Elf32_Ehdr(header);
 	
+	read_Shdr_list(f, header, &shdr_list);
+	afficher_Shdr_list(&shdr_list);
 	
-	read_Shdr_list( f );
-	afficher_Shdr_list();
-	read_Sym_list( f );
-	afficher_Sym_list();
-	read_header( f );
-	afficher_Elf32_Ehdr( header );
+	read_Sym_list(f, header, &sym_list);
+	afficher_Sym_list(sym_list);
+	
 /*	
 	char **table;
 	int i=0;
