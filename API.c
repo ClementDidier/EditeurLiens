@@ -146,7 +146,6 @@ int read_Elf32_Sym( FILE *f, Elf32_Ehdr h, Elf32_Sym *s)
 // Lecture de l'ensemble des Section Headers  
 void read_Shdr_list(FILE *f, Elf32_Ehdr h, Shdr_list * L)
 {
-	printf("READ_SHDR_LIST CALLED\n");
 	int i;
 
 	Shdr_list * Q = L, *N;
@@ -174,7 +173,8 @@ void afficher_Shdr( Shdr_list * l)
 	int i;
 	printf("  [+]Header\n\tsh_name : %d\n\tsh_type : %d\n\tsh_addr : %d\n\tsh_offset : %d\n\tsh_size : %d\n\tsh_entsize : %d\n\tsh_flags : %d\n\tsh_link : %d\n\tsh_info : %d\n\tsh_addralign : %d\n",  s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);	
 	printf("  [+] Content\n\t");
-	for( i = 0; i < l->header.sh_size; i++ ){
+	for( i = 0; i < l->header.sh_size; i++ )
+	{
 		printf("%.02x", (unsigned char)(l->dump[i]));
 	}
 	printf("\n");
@@ -197,7 +197,8 @@ void afficher_rel_list(Shdr_list * l)
 	int i = 0;
 	Shdr_list * L = l;
 	printf(" Liste des section headers : \n");
-	while( L != NULL ){
+	while( L != NULL )
+	{
 		printf(" Section [%d] :\n",i++);
 		afficher_Shdr(L);
 		L = L->next;
@@ -265,7 +266,8 @@ void afficher_Sym( Elf32_Sym S ){
 void afficher_Sym_list(Sym_list l)
 {
 	int i;
-	for( i = 0; i < l.nb; i++ ){
+	for( i = 0; i < l.nb; i++ )
+	{
 		printf("Symbole [%d] : \n", i);
 		afficher_Sym(l.list[i]);
 	}
@@ -274,8 +276,7 @@ void afficher_Sym_list(Sym_list l)
 // Charge le contenu de la section donnée dans une structure de données personnalisée
 void read_Elf32_Shdr_Content(Shdr_list *s, unsigned int index, Elf32_Shdr_Content * cp)
 {
-	// TODO : A tester
-	Shdr_list *sc = s;
+	Shdr_list * sc = s;
 	Elf32_Shdr_Content *c;
 	
 	c = cp;

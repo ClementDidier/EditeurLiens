@@ -21,9 +21,6 @@ struct Shdr_list{
 	Shdr_list * next;
 };
 
-int *num_sections;
-int size_num_sections;
-
 typedef struct Sym_list Sym_list;
 struct Sym_list{
 	Elf32_Sym * list;

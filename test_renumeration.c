@@ -15,24 +15,34 @@ int main(int argc, char * argv[])
 	Elf32_Ehdr header;
 	Shdr_list shdr_list;
 	Sym_list sym_list;
+	Shdr_list rel_list;
+	int * num_sections;
+	int size_num_sections;
 	
-	// Lecture dans le ficheir 
+	// Lecture dans le fichier 
 	read_Elf32_Ehdr(f, &header);
+	
+	num_sections = malloc((header.e_shnum) * sizeof(int));
+	size_num_sections = header.e_shnum;
+	int i;
+	for( i = 0; i < size_num_sections ; i++)
+		num_sections[i] = i;
+	
 	read_Shdr_list(f, header, &shdr_list);
 	read_Sym_list(f, header, &sym_list);
 	
 	// Suppression des sections de relocation 
 	printf("[+]Séparation des sections de relocation (.rel) ...\n");
-	enlever_relocation();
+	enlever_relocation(header, &shdr_list, &rel_list, num_sections);
 		
 	// Affichage a l'ecran 
-	//afficher_Shdr_list(shdr_list);
-	//afficher_Shdr_list(rel_list);
-	//afficher_tableau_sections();
+	//afficher_Shdr_list(&shdr_list);
+	afficher_Shdr_list(&rel_list);
+	//afficher_tableau_sections(num_sections, size_num_sections);
 	
 	// Correction des symboles : 
 	printf("[+]Correction des symboles...\n");
-	correction_symboles();
+	correction_symboles(header, &shdr_list, &sym_list, num_sections);
 	
 	// Ecriture dans un fichier 
 	

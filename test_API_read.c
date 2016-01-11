@@ -13,7 +13,6 @@ int main(int argc, char * argv[])
 	
 	Elf32_Ehdr header;
 	Shdr_list shdr_list;
-	//Shdr_list *rel_list;
 	Sym_list sym_list; 
 	
 	read_Elf32_Ehdr(f, &header);
