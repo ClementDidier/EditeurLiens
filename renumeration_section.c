@@ -39,7 +39,6 @@ void enlever_relocation()
 	}
 	num_sections[indice_section] = indice_saut;
 	header.e_shnum = indice_saut;
-	header.e_shoff -= removed_size; // l'offset de la table des shdr a change car on a supprime des sections ;-) 
 	header.e_shstrndx = num_sections[header.e_shstrndx];
 	header.e_type = ET_EXEC;
 	// mise à jour de l'offset des sections et de sh_link
