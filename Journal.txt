@@ -31,7 +31,7 @@ le travail à faire sur les étapes de la phase 2. Et nous nous sommes munis d'u
 		*Principalement des types de structures pour manipuler les headers, variables et autres données d'un fichier ELF
 	
 	-Répartition des tâches pour la Phase 2
-		*Alixia et Thaqif : 	implémentation d'une fonction qui étant donné un ensemble de sections, sépare les sections à réimplanter
+		*Alixia et Thaqif : implémentation d'une fonction qui étant donné un ensemble de sections, sépare les sections à réimplanter
 									et renumérote le nouvel ensemble de sections obtenu. (Etape 6)
 		*Clément : implémentation d'une fonction qui écrit dans un fichier, les données contenues dans les type de structures que nous avons définis
 
@@ -49,6 +49,18 @@ Vendredi 8 janvier 2016 :
 	-Préparation de l'étape 8 : compréhension de la relocation
 	-Mise à jour de l'API
 		*Ajout d'une fonction pour récupérer la structure de réimplantation des données
+
+Lundi 11 janvier 2016 :
+
+	-Audi de code a 10h30
+	-Répartition des tâches pour les jours suivants
+		* Thibault, Alixia et Thaqif : implémentation de la partie 8 et 9
+		* Clément : reconfiguration du code suite à l'intervention des professeurs : enlever les variables globales
+		* Boyan : correction de certain bug dans la partie 7 et vérification des résultat de cette partie
+
+Mardi 12 janvier 2016 :
+	-Finalisation des différentes tâches et test sur les fonctions terminées
+	-Boyan : compréhension de la partie 10
 
 
 	

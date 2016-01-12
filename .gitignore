@@ -43,6 +43,7 @@ test_renumeration
 contenu_sections
 correction_symboles
 test_affichage_sections
+test_table_symboles
 
 # Debug files
 *.dSYM/

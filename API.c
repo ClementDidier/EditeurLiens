@@ -128,6 +128,7 @@ int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s)
 
 // Lis une structure Elf32_Sym
 // Renvoie le nombre d'octets lus 
+// Le placement du curseur doit etre effectué avant l'appel de la fonction
 int read_Elf32_Sym( FILE *f, Elf32_Ehdr h, Elf32_Sym *s)
 {
 	unsigned long int size = sizeof(Elf32_Sym);
@@ -192,19 +193,7 @@ void afficher_Shdr_list(Shdr_list * l)
 	}
 }
 
-void afficher_rel_list(Shdr_list * l)
-{
-	int i = 0;
-	Shdr_list * L = l;
-	printf(" Liste des section headers : \n");
-	while( L != NULL )
-	{
-		printf(" Section [%d] :\n",i++);
-		afficher_Shdr(L);
-		L = L->next;
-	}
-}
-
+// TODO : Revoir
 // Lecture de l'ensemble des symboles 
 void read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l)
 {
@@ -216,6 +205,7 @@ void read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l)
 	
 	// Recherche dans les headers de celui de .symtab
 	fseek( f, h.e_shoff, SEEK_SET );
+	
 	// Pour chaque header on regarde si c'est le bon ( i.e si son type correspond a SHT_SYMTAB )
 	while( (symtab_off == 0 || strtab_off == 0 ))
 	{
@@ -286,6 +276,7 @@ void read_Elf32_Shdr_Content(Shdr_list *s, unsigned int index, Elf32_Shdr_Conten
 		sc = sc->next;
 	}
 	
+	// Lecture du dump
 	int j, k;
 	for(j = 0; j < sc->header.sh_size; j+=8)
 	{
@@ -303,7 +294,7 @@ void read_Elf32_Shdr_Content(Shdr_list *s, unsigned int index, Elf32_Shdr_Conten
 		c->sym = ELF32_R_SYM(c->info);
 		c->type = ELF32_R_TYPE(c->info);
 		
-		if(j+8 < sc->header.sh_size)
+		if(j + 8 < sc->header.sh_size)
 		{
 			c->next = malloc(sizeof(Elf32_Shdr_Content));
 			c = c->next;
@@ -333,8 +324,7 @@ int read_Elf32_Rel( FILE *f, Elf32_Ehdr h, Elf32_Rel *r, int indice, Elf32_Shdr 
 	fseek(f, s.sh_offset, SEEK_SET);
 	fseek(f, indice * sizeof(Elf32_Rel), SEEK_CUR);
 	fread(r, sizeof(Elf32_Rel), 1,f);
-
-	// Inversion big/little sur les champs de plus d'un octet 
+	
 	r->r_offset = recuperer_valeur32(h, r->r_offset);
 	r->r_info 	= recuperer_valeur32(h, r->r_info);
 	return size;
@@ -350,7 +340,6 @@ int read_Elf32_Rela( FILE *f, Elf32_Ehdr h, Elf32_Rela *ra, int indice, Elf32_Sh
 	fseek(f, indice * sizeof(Elf32_Rela), SEEK_CUR);
 	fread(ra, sizeof(Elf32_Rela), 1, f);
 
-	// Inversion big/little sur les champs de plus d'un octet 
 	ra->r_offset 	= recuperer_valeur32(h, ra->r_offset);
 	ra->r_info		= recuperer_valeur32(h, ra->r_info);
 	ra->r_addend	= recuperer_valeur32(h, ra->r_addend);
@@ -366,14 +355,13 @@ inline void fwrite_value16(FILE * f, Elf32_Ehdr h, int value, int size)
 
 inline void fwrite_value32(FILE * f, Elf32_Ehdr h, int value, int size)
 {
-	int16_t v = recuperer_valeur32(h, value);
+	int32_t v = recuperer_valeur32(h, value);
 	fwrite(&v, size, 1, f);
 }
 
 // Ecrit le header dans le stream
 void write_Elf32_Ehdr(FILE *f, Elf32_Ehdr h)
 {
-	// Attention Offsets & attributs non renseignés
 	rewind(f);
 	
 	fwrite(h.e_ident, sizeof(unsigned char), EI_NIDENT, f);
@@ -411,7 +399,9 @@ void write_Elf32_Shdr(FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr s)
 	fwrite_value32(f, h, s.sh_entsize, sizeof(Elf32_Word));
 }
 
-void write_dump( FILE * f,  unsigned char * dump, Elf32_Word size, Elf32_Off offset)
+// Ecriture d'un dump
+// Ecriture en position courante du curseur
+void write_dump(FILE * f,  unsigned char * dump, Elf32_Word size, Elf32_Off offset)
 {
 		unsigned int i;
 		fseek( f, offset , SEEK_SET);
@@ -419,7 +409,20 @@ void write_dump( FILE * f,  unsigned char * dump, Elf32_Word size, Elf32_Off off
 			fprintf(f,"%c", dump[i]);
 }
 
+// Ecriture d'un symbole
+// Ecriture en position courante du curseur
+void write_Elf32_Sym(FILE * f, Elf32_Ehdr h, Elf32_Sym s)
+{
+	fwrite_value32(f, h, s.st_name, sizeof(Elf32_Word));
+	fwrite_value32(f, h, s.st_value, sizeof(Elf32_Addr));
+	fwrite_value32(f, h, s.st_size, sizeof(Elf32_Word));
+	fwrite_value32(f, h, s.st_info, sizeof(unsigned char));
+	fwrite_value32(f, h, s.st_other, sizeof(unsigned char));
+	fwrite_value16(f, h, s.st_shndx, sizeof(Elf32_Half));
+}
+
 // Ecrit l'ensemble des sections
+// Ecriture en position courante du curseur
 void write_Shdr_list(FILE * f, Elf32_Ehdr h, Shdr_list * l)
 {
 	int i = 0;
@@ -438,6 +441,17 @@ void write_Shdr_list(FILE * f, Elf32_Ehdr h, Shdr_list * l)
 	}
 }
 
+// Ecrit la liste de symboles
+// Ecriture en position courante du curseur
+void write_Sym_list(FILE * f, Elf32_Ehdr h, Sym_list l)
+{
+	int i;
+	for(i = 0; i < l.nb; i++)
+	{
+		write_Elf32_Sym(f, h, l.list[i]);
+	}
+}
+
 Shdr_list * find_section(int num, Shdr_list * l)
 {
 	Shdr_list * L = l;
@@ -450,7 +464,8 @@ Shdr_list * find_section(int num, Shdr_list * l)
 Shdr_list * find_symbols_section(Shdr_list * l)
 {
 	Shdr_list * L = l;
-	while( L != NULL ){
+	while( L != NULL )
+	{
 		if ( L->header.sh_type == SHT_SYMTAB )
 			break;
 		L = L->next;
@@ -466,7 +481,7 @@ char ** sections_names_table(FILE * f, Elf32_Ehdr h)
 	fseek(f, offset, SEEK_SET);
 	fseek(f, 16, SEEK_CUR );
 	fread( &offset, 4, 1, f );
-	offset = __bswap_32(offset);
+	offset = recuperer_valeur32(h, offset);
 	
 	char ** table = (char**) malloc(h.e_shnum * sizeof(char*));
 	

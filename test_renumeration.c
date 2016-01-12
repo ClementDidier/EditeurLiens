@@ -15,7 +15,7 @@ int main(int argc, char * argv[])
 	Elf32_Ehdr header;
 	Shdr_list shdr_list;
 	Sym_list sym_list;
-	Shdr_list rel_list;
+	Shdr_list * rel_list = NULL;
 	int * num_sections;
 	int size_num_sections;
 	
@@ -33,11 +33,11 @@ int main(int argc, char * argv[])
 	
 	// Suppression des sections de relocation 
 	printf("[+]Séparation des sections de relocation (.rel) ...\n");
-	enlever_relocation(header, &shdr_list, &rel_list, num_sections);
-		
+	rel_list = enlever_relocation(header, &shdr_list, rel_list, num_sections);
 	// Affichage a l'ecran 
 	//afficher_Shdr_list(&shdr_list);
-	afficher_Shdr_list(&rel_list);
+	//printf("rel_list.header : %d\n", rel_list->header.sh_name);
+	afficher_Shdr_list(rel_list);
 	//afficher_tableau_sections(num_sections, size_num_sections);
 	
 	// Correction des symboles : 

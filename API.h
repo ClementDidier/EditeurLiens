@@ -83,7 +83,6 @@ int read_Elf32_Rel( FILE *f, Elf32_Ehdr h, Elf32_Rel *r, int indice, Elf32_Shdr 
 void read_Shdr_list(FILE *f, Elf32_Ehdr h, Shdr_list * l);
 void afficher_Shdr_list(Shdr_list * l);
 void afficher_Shdr(Shdr_list * l);
-void afficher_rel_list(Shdr_list * l);
 
 void read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l);
 void afficher_Sym_list(Sym_list l);
@@ -106,10 +105,15 @@ void write_Elf32_Ehdr(FILE *f, Elf32_Ehdr h);
 void write_Elf32_Shdr(FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr s);
 // Ecrit un dump de section dans un fichier
 void write_dump( FILE * f,  unsigned char * dump, Elf32_Word size, Elf32_Off offset);
+// Ecrit un symbole dans un fichier
+void write_Elf32_Sym(FILE * f, Elf32_Ehdr h, Elf32_Sym s);
 
 // Ecrit l'ensemble des sections
 // D'abord les dumps, puis les headers correspondants
 void write_Shdr_list(FILE * f, Elf32_Ehdr h, Shdr_list * l);
+
+// Ecrit l'ensemble des symboles
+void write_Sym_list(FILE * f, Elf32_Ehdr h, Sym_list l);
 
 // Autre : 
 // Renvoie un pointeur vers le debut de la Shdr_list correspondant au numero de section 
