@@ -50,7 +50,8 @@ struct Elf32_Shdr_Content
 // Retourne 1 si l'endianess du header est en big endian, 0 dans le cas contraire
 int is_big_endian(Elf32_Ehdr h);
 
-int32_t recuperer_valeur32(Elf32_Ehdr h, int32_t value);
+int32_t recuperer_va//Convertit une chaine de caractères en valeur hexadécimale
+int char_to_hex(char *strg);leur32(Elf32_Ehdr h, int32_t value);
 int16_t recuperer_valeur16(Elf32_Ehdr h, int16_t value);
 
 // *************************************************************************************************************
@@ -118,8 +119,12 @@ void write_Sym_list(FILE * f, Elf32_Ehdr h, Sym_list l);
 // Autre : 
 // Renvoie un pointeur vers le debut de la Shdr_list correspondant au numero de section 
 Shdr_list * find_section(int num, Shdr_list * l);
+Shdr_list * find_section_name(char **names,char *name, Shdr_list *l);
 Shdr_list * find_symbols_section(Shdr_list * l);
 
 // Obtient la table des strings
 char ** sections_names_table(FILE * f, Elf32_Ehdr h);
+
+//Convertit une chaine de caractères en valeur hexadécimale
+int char_to_hex(char *strg);
 #endif

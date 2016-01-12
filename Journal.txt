@@ -59,8 +59,8 @@ Lundi 11 janvier 2016 :
 		* Boyan : correction de certain bug dans la partie 7 et vérification des résultat de cette partie
 
 Mardi 12 janvier 2016 :
+	-Fin implémentation de la partie 8 et 9
 	-Finalisation des différentes tâches et test sur les fonctions terminées
 	-Boyan : compréhension de la partie 10
-
-
+	-Nettoyage et rangement des fichiers du projet ( dans le github )
 	

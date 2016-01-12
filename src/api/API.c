@@ -452,6 +452,18 @@ void write_Sym_list(FILE * f, Elf32_Ehdr h, Sym_list l)
 	}
 }
 
+Shdr_list * find_section_name(char **names,char *name, int Shdr_list *l)
+{
+	Shdr_list *list = l;
+	int i=0;
+	while(strcmp(names[i],name)!=0 && list!=NULL){
+		i++;
+		list = list->next;
+	}
+	if(list!=NULL)list=find_section(i);
+	return list;
+}
+
 Shdr_list * find_section(int num, Shdr_list * l)
 {
 	Shdr_list * L = l;
@@ -498,4 +510,15 @@ char ** sections_names_table(FILE * f, Elf32_Ehdr h)
 	}
 	
 	return table;
+}
+
+//Convertit une chaine de caractères en valeur hexadécimale
+int char_to_hex(char *strg){
+	int i=2;
+	int hex=0;
+	while(strg[i]!='\0'){
+		hex = 16*hex+(strg[i] - '0');
+		i++;
+	}
+	return hex;
 }
