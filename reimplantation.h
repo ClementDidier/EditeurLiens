@@ -3,6 +3,9 @@
 
 #include "API.h"
 
+//ecrit à l'offset de c en parametre adresse
+void ecrire(Elf32_Shdr_Content *c, int32_t result, Shdr_list *list);
+
 //parametre content_list + info
 void ARM(Elf32_Shdr_Content *rel_content, int info);
 
