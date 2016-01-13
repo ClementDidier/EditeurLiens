@@ -48,10 +48,7 @@ struct Elf32_Shdr_Content
 //void l2b_endian_16( unsigned int * val );
 
 // Retourne 1 si l'endianess du header est en big endian, 0 dans le cas contraire
-int is_big_endian(Elf32_Ehdr h);
-
-int32_t recuperer_valeur32(Elf32_Ehdr h, int32_t value);
-int16_t recuperer_valeur16(Elf32_Ehdr h, int16_t value);
+int my_is_big_endian(Elf32_Ehdr h);
 
 // *************************************************************************************************************
 // ********* Fonctions de lecture des valeurs codees en big endian vers une architecture little endian *********
@@ -96,9 +93,6 @@ void afficher_Elf32_Shdr_Content(Elf32_Shdr_Content c);
 // ***************** Fonction d'ecriture de nos structures vers un fichier ELF resultat ************************
 // *************************************************************************************************************
 
-inline void fwrite_value16(FILE * f, Elf32_Ehdr h, int value, int size);
-inline void fwrite_value32(FILE * f, Elf32_Ehdr h, int value, int size);
-
 // Ecrit le header dans le stream
 void write_Elf32_Ehdr(FILE *f, Elf32_Ehdr h);
 // Ecrit un header de section dans un fichier 
@@ -123,7 +117,4 @@ Shdr_list * find_symbols_section(Shdr_list * l);
 
 // Obtient la table des strings
 char ** sections_names_table(FILE * f, Elf32_Ehdr h);
-
-//Convertit une chaine de caractères en valeur hexadécimale
-int char_to_hex(char *strg);
 #endif

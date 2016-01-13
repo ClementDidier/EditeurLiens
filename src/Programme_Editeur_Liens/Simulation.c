@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include "debug.h"
 
-void init_simulation( arm_simulator_data_t *sim ){
+void init_simulation( arm_simulator_data_t *sim , Shdr_list *shdr_list){
 	Shdr_list *L = shdr_list;
 	*sim = arm_connect( "localhost", "6666" );
 	while( L != NULL ){
@@ -30,17 +30,37 @@ int main( int argc, char ** argv ){
 		printf("Erreur lors de la lecture du fichier ELF");
 		return -1;
 	}
+
+
+	//Initialisations des variables utiles
+	Elf32_Ehdr h;
+	Shdr_list shdr_list;
+	Sym_list  sym_list;
+	Shdr_list * rel_list = NULL;
+	int * num_sections;
+	int size_num_sections;
+	char ** names;
+
 	
 	printf("[+]Lecture du fichier elf...\n");	
 	// Lecture dans le ficheir 
-	read_header(f);
-	read_Shdr_list( f );
-	read_Sym_list( f );	
+	read_Elf32_Ehdr(f,&h);
+	names = sections_names_table(f,h);	
+	read_Shdr_list(f, h, &shdr_list);
+	read_Sym_list(f, h, &sym_list, shdr_list,names);
+	
+	//Initialisation de num_sections
+	num_sections = malloc((h.e_shnum) * sizeof(int));
+	size_num_sections = h.e_shnum;
+	int i;
+	for( i = 0; i < size_num_sections ; i++)
+		num_sections[i] = i;
+
 	// Suppression des sections de relocation 
 	printf("[+]Séparation des sections de relocation (.rel) ...\n");
-	enlever_relocation();
-	
-	L = shdr_list;
+	rel_list = enlever_relocation(h, &shdr_list, rel_list, num_sections);	
+
+	L = &shdr_list;
 	// Mise a jour des adresses des sections
 	while ( L != NULL ){
 		L->header.sh_addr = addr;
@@ -50,10 +70,10 @@ int main( int argc, char ** argv ){
 	
 	// Correction des symboles : 
 	printf("[+]Correction des symboles...\n");
-	correction_symboles();
+	correction_symboles(h, &shdr_list, &sym_list, num_sections);
 	// Reimplantation
 	printf("[+]Reimplantation...\n");
-	reimplantation();
+	reimplantation(h,rel_list,&shdr_list, sym_list,num_sections);
 	
 	// Ecriture dans un fichier 	
 	if((fres = fopen("elfres.exe", "w")) == NULL)
@@ -63,8 +83,8 @@ int main( int argc, char ** argv ){
 	}
 	
 	printf("[+]Création du fichier elf executable 'elfres.exe'...\n");
-	write_Elf32_Ehdr( fres, header );
-	write_Shdr_list( fres );
+	write_Elf32_Ehdr( fres, h );
+	write_Shdr_list( fres , h , &shdr_list );
 	
 	fclose(f);
 	fclose(fres);
@@ -72,7 +92,7 @@ int main( int argc, char ** argv ){
 	printf("[-]Transformation terminee, le resultat peut etre observe via 'readelf [opt] elfres.exe' \n\n");
 	
 	printf("[+]Simulation... \n");
-	init_simulation( &sim );
+	init_simulation( &sim, &shdr_list );
 	
 	//arm_run( sim );
 	

@@ -1,33 +1,7 @@
 #include "API.h"
 
-
-// Fonctions d'inversion d'endianness little->big ou big->little
-// Travaillent directement sur la mémoire 
-/* Deprecated
-void l2b_endian_32( unsigned int * val )
-{
-	uint32_t b0,b1,b2,b3;
-	uint32_t num = *val;
-	b0 = (num & 0x000000ff) << 24u;
-	b1 = (num & 0x0000ff00) << 8u;
-	b2 = (num & 0x00ff0000) >> 8u;
-	b3 = (num & 0xff000000) >> 24u;
-	*val = b0 | b1 | b2 | b3;
-}
-
-void l2b_endian_16( unsigned int * val )
-{
-	uint32_t b0,b1,b2,b3;
-	uint32_t num = *val;
-	b0 = (num & 0x000000ff) << 8u;
-	b1 = (num & 0x0000ff00) >> 8u;
-	b2 = (num & 0x00ff0000);
-	b3 = (num & 0xff000000);
-	*val = b0 | b1 | b2 | b3;
-}*/
-
 // Retourne 1 si l'endianess du header est en big endian, 0 dans le cas contraire
-int is_big_endian(Elf32_Ehdr h)
+int my_is_big_endian(Elf32_Ehdr h)
 {
 	return h.e_ident[ENDIANESS_VALUE_INDEX] == ELFDATA2MSB;
 }
@@ -35,45 +9,14 @@ int is_big_endian(Elf32_Ehdr h)
 // Swap conditionnel de la valeur sur 32 bits, en fonction de l'endianess
 int32_t recuperer_valeur32(Elf32_Ehdr h, int32_t value)
 {
-	return is_big_endian(h) ? __bswap_32(value) : value;
+	return my_is_big_endian(h) ? __bswap_32(value) : value;
 }
 
 // Swap conditionnel de la valeur sur 16 bits, en fonction de l'endianess
 int16_t recuperer_valeur16(Elf32_Ehdr h, int16_t value)
 {
-	return is_big_endian(h) ? __bswap_16(value) : value;
+	return my_is_big_endian(h) ? __bswap_16(value) : value;
 }
-
-// Fonctions de lecture des valeurs codees en big endian vers une architecture little endian 
-// Deprecated
-/*int read_header( FILE *f ){
-	Elf32_Ehdr *h = &header;
-	unsigned long int size = sizeof(Elf32_Ehdr);
-	int i;
-	fseek(f, 0, SEEK_SET);
-	fread( h, size , 1, f);
-	
-	// Inversion de l'endianess 
-	h->e_type 		= recuperer_valeur16(*h, h->e_type);
-	h->e_machine 	= recuperer_valeur16(*h, h->e_machine);
-    h->e_version 	= recuperer_valeur32(*h, h->e_version);
-    h->e_entry 		= recuperer_valeur32(*h, h->e_entry);
-    h->e_phoff 		= recuperer_valeur32(*h, h->e_phoff);
-    h->e_shoff 		= recuperer_valeur32(*h, h->e_shoff);
-    h->e_flags 		= recuperer_valeur32(*h, h->e_flags);
-	h->e_ehsize 	= recuperer_valeur16(*h, h->e_ehsize);
-	h->e_phentsize 	= recuperer_valeur16(*h, h->e_phentsize);
-	h->e_phnum 		= recuperer_valeur16(*h, h->e_phnum);
-	h->e_shentsize 	= recuperer_valeur16(*h, h->e_shentsize);
-	h->e_shnum 		= recuperer_valeur16(*h, h->e_shnum);
-	h->e_shstrndx 	= recuperer_valeur16(*h, h->e_shstrndx);
-	
-	num_sections = malloc( (h->e_shnum)*sizeof(int) );
-	size_num_sections = h->e_shnum;
-	for( i = 0; i < size_num_sections ; i++)
-		num_sections[i] = i;
-	return size;
-}*/
 
 // Lis le header du fichier ELF
 int read_Elf32_Ehdr( FILE *f, Elf32_Ehdr * h )
@@ -81,16 +24,16 @@ int read_Elf32_Ehdr( FILE *f, Elf32_Ehdr * h )
 	unsigned long int size = sizeof(Elf32_Ehdr);
 	rewind(f); //fseek(f, 0, SEEK_SET);
 	
-	fread( h, size , 1, f);
+	int rb = fread( h, size , 1, f);
 
 	// Inversion de l'endianess 
 	h->e_type 		= recuperer_valeur16(*h, h->e_type);
 	h->e_machine 	= recuperer_valeur16(*h, h->e_machine);
-    h->e_version 	= recuperer_valeur32(*h, h->e_version);
-    h->e_entry 		= recuperer_valeur32(*h, h->e_entry);
-    h->e_phoff 		= recuperer_valeur32(*h, h->e_phoff);
-    h->e_shoff 		= recuperer_valeur32(*h, h->e_shoff);
-    h->e_flags 		= recuperer_valeur32(*h, h->e_flags);
+	h->e_version 	= recuperer_valeur32(*h, h->e_version);
+	h->e_entry 		= recuperer_valeur32(*h, h->e_entry);
+	h->e_phoff 		= recuperer_valeur32(*h, h->e_phoff);
+	h->e_shoff 		= recuperer_valeur32(*h, h->e_shoff);
+	h->e_flags 		= recuperer_valeur32(*h, h->e_flags);
 	h->e_ehsize 	= recuperer_valeur16(*h, h->e_ehsize);
 	h->e_phentsize 	= recuperer_valeur16(*h, h->e_phentsize);
 	h->e_phnum 		= recuperer_valeur16(*h, h->e_phnum);
@@ -98,9 +41,10 @@ int read_Elf32_Ehdr( FILE *f, Elf32_Ehdr * h )
 	h->e_shnum 		= recuperer_valeur16(*h, h->e_shnum);
 	h->e_shstrndx 	= recuperer_valeur16(*h, h->e_shstrndx);
 
-	return size;
+	return rb;
 }
-void afficher_Elf32_Ehdr( Elf32_Ehdr h ){
+void afficher_Elf32_Ehdr( Elf32_Ehdr h )
+{
 	printf("HEADER  : \n\te_type : %d\n\te_machine : %d\n\te_version : %d\n\te_entry : %d\n\te_phoff : %d\n\te_shoff : %d\n\te_flags : %d\n\te_ehsize : %d\n\te_phentsize : %d\n\te_phnum : %d\n\te_shentsize : %d\n\te_shnum : %d\n\te_shstrndx : %d\n\n",
 		h.e_type, h.e_machine, h.e_version, h.e_entry, h.e_phoff, h.e_shoff, h.e_flags, h.e_ehsize, h.e_phentsize, h.e_phnum, h.e_shentsize, h.e_shnum, h.e_shstrndx);	
 }
@@ -109,7 +53,7 @@ int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s)
 {
 	unsigned long int size = sizeof(Elf32_Shdr);
 	fseek(f, h.e_shoff + size * index, SEEK_SET);
-	fread(s, size, 1, f);
+	int rb = fread(s, size, 1, f);
 	
 	// Inversion de l'endianess 
 	s->sh_name 		= recuperer_valeur32(h, s->sh_name);
@@ -123,7 +67,7 @@ int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s)
 	s->sh_addralign = recuperer_valeur32(h, s->sh_addralign);
 	s->sh_entsize 	= recuperer_valeur32(h, s->sh_entsize);
 	
-	return size;
+	return rb;
 }
 
 // Lis une structure Elf32_Sym
@@ -132,7 +76,7 @@ int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s)
 int read_Elf32_Sym( FILE *f, Elf32_Ehdr h, Elf32_Sym *s)
 {
 	unsigned long int size = sizeof(Elf32_Sym);
-	fread( s, size , 1, f);
+	int rb = fread( s, size , 1, f);
 	
 	// Inversion big/little sur les champs de plus d'un octet 
 	s->st_name = recuperer_valeur32(h, s->st_name);
@@ -140,7 +84,7 @@ int read_Elf32_Sym( FILE *f, Elf32_Ehdr h, Elf32_Sym *s)
 	s->st_size = recuperer_valeur32(h, s->st_size);
 	s->st_shndx = recuperer_valeur16(h, s->st_shndx);
 	
-	return size;
+	return rb;
 }
 
 
@@ -153,7 +97,8 @@ void read_Shdr_list(FILE *f, Elf32_Ehdr h, Shdr_list * L)
 	L->next = NULL;
 	
 	read_Elf32_Shdr(f, h, 0, &(L->header));
-	for( i = 1; i < h.e_shnum; i++ ){
+	for( i = 1; i < h.e_shnum; i++ )
+	{
 		N = malloc( sizeof(Shdr_list) );
 		// Lecture du header
 		read_Elf32_Shdr(f, h, i, &(N->header));
@@ -194,44 +139,36 @@ void afficher_Shdr_list(Shdr_list * l)
 }
 
 
-int32_t lire_4_octets(unsigned char *dump,int i){
-	int32_t truc,j;
-		for(j=0;j<4;j++){
-			truc = truc << 8;
-			truc |= dump[i+j];
-		}	
-	return truc;
+int32_t lire_4_octets(unsigned char *dump, int i)
+{
+	unsigned int *pdata = (unsigned int*)(dump + i);
+	unsigned int data = *pdata;	
+	return data;
 }
 
-int16_t lire_2_octets(unsigned char *dump,int i){
-	int16_t truc,j;
-		for(j=0;j<2;j++){
-			truc = truc << 8;
-			truc |= dump[i+j];
-		}	
-	return truc;
+int16_t lire_2_octets(unsigned char *dump,int i)
+{
+	unsigned short *pdata = (unsigned int*)(dump + i);
+	unsigned short data = *pdata;
+	return data;
 }
 
 
-Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * list, Shdr_list sl, char **names){
+Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * list, Shdr_list sl, char **names)
+{
 	Sym_list * l = list;
 	Shdr_list * retour;
 	retour = find_section_name(names,".symtab",&sl);
 	int i=0;
 	int j=0;
-	l->list = malloc(retour->header.sh_size);
+	l->list = malloc((retour->header.sh_size));
 	while(i != retour->header.sh_size){
-		l->list[j].st_name = lire_4_octets(retour->dump,i); i += 4;
-		printf("\nIci on lit ça : %08x\n",l->list[j].st_name);
-		l->list[j].st_value = lire_4_octets(retour->dump,i); i += 4;
-		printf("\nIci on lit ça : %08x\n",l->list[j].st_value);
-		l->list[j].st_size = lire_4_octets(retour->dump,i); i += 4;
-		printf("\nIci on lit ça : %08x\n",l->list[j].st_size);
+		l->list[j].st_name = recuperer_valeur32(h,lire_4_octets(retour->dump,i)); i += 4;
+		l->list[j].st_value = recuperer_valeur32(h,lire_4_octets(retour->dump,i)); i += 4;
+		l->list[j].st_size = recuperer_valeur32(h,lire_4_octets(retour->dump,i)); i += 4;
 		l->list[j].st_info = retour->dump[i]; i ++;
-		printf("\nIci on lit ça : %02x\n",l->list[j].st_info);
 		l->list[j].st_other = retour->dump[i]; i ++;
-		printf("\nIci on lit ça : %02x\n",l->list[j].st_other);
-		l->list[j].st_shndx = lire_2_octets(retour->dump,i); i += 2;
+		l->list[j].st_shndx = recuperer_valeur16(h,lire_2_octets(retour->dump,i)); i += 2;
 		
 		j++;
 	}
@@ -240,62 +177,6 @@ Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * list, Shdr_list sl, cha
 
 }
 
-
-/*
-// TODO : Revoir
-// Lecture de l'ensemble des symboles 
-void read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l)
-{
-	unsigned int tmp;
-	unsigned int symtab_off = 0, strtab_off = 0, symtab_size = 0; 
-	unsigned int strtab_index, size, i;
-	
-	l->nb = 0;
-	
-	// Recherche dans les headers de celui de .symtab
-	fseek( f, h.e_shoff, SEEK_SET );
-	
-	// Pour chaque header on regarde si c'est le bon ( i.e si son type correspond a SHT_SYMTAB )
-	while( (symtab_off == 0 || strtab_off == 0 ))
-	{
-		fseek( f, 4, SEEK_CUR );
-		fread( &tmp, 4, 1, f ); 
-		tmp = recuperer_valeur32(h, tmp);
-		
-		if ( tmp == SHT_SYMTAB ){
-			// On a trouve le header de la table des symboles
-			// Lecture des infos 
-			fseek( f, 8, SEEK_CUR );
-			fread( &symtab_off, 4, 1, f ); 
-			symtab_off = recuperer_valeur32(h, symtab_off);
-			fread( &symtab_size, 4, 1, f ); 
-			symtab_size = recuperer_valeur32(h, symtab_size);
-			// Lecture de l'index dans la table des headers de la table des strings associee : .strtab 
-			fread( &strtab_index, 4, 1, f ); 
-			strtab_index = recuperer_valeur32(h, strtab_index);
-			// Deplacement du descripteur de fichier vers le header de .strtab
-			fseek( f, h.e_shoff + h.e_shentsize * strtab_index, SEEK_SET );
-			fseek( f, 16, SEEK_CUR );
-			// Lecture de son offset 
-			fread( &strtab_off, 4, 1, f ); 
-			strtab_off = recuperer_valeur32(h, strtab_off);
-		}
-		else
-		{
-			fseek(f, 8 * sizeof(Elf32_Word), SEEK_CUR);
-		}
-	} 
-	
-	// Lecture de la table des symboles un par un : 
-	fseek(f, symtab_off, SEEK_SET);
-	size = symtab_size / sizeof(Elf32_Sym);
-	l->nb = size;
-	l->list = malloc(size * sizeof(Elf32_Sym));
-	
-	for( i = 0; i < size; i++ )
-		read_Elf32_Sym(f, h, &(l->list[i]));
-}
-*/
 
 void afficher_Sym( Elf32_Sym S ){
 	printf("\tname : %d \tvalue : %d \tsize : %d \tinfo : %d \tother : %d \tshndx : %d\n",
@@ -561,13 +442,3 @@ char ** sections_names_table(FILE * f, Elf32_Ehdr h)
 	return table;
 }
 
-//Convertit une chaine de caractères en valeur hexadécimale
-int char_to_hex(char *strg){
-	int i=2;
-	int hex=0;
-	while(strg[i]!='\0'){
-		hex = 16*hex+(strg[i] - '0');
-		i++;
-	}
-	return hex;
-}
