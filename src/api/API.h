@@ -50,8 +50,7 @@ struct Elf32_Shdr_Content
 // Retourne 1 si l'endianess du header est en big endian, 0 dans le cas contraire
 int is_big_endian(Elf32_Ehdr h);
 
-int32_t recuperer_va//Convertit une chaine de caractères en valeur hexadécimale
-int char_to_hex(char *strg);leur32(Elf32_Ehdr h, int32_t value);
+int32_t recuperer_valeur32(Elf32_Ehdr h, int32_t value);
 int16_t recuperer_valeur16(Elf32_Ehdr h, int16_t value);
 
 // *************************************************************************************************************
