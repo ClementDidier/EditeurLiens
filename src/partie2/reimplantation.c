@@ -1,96 +1,101 @@
-#include "API.h"
+#include "reimplantation.h"
 
 
-//ecrit à l'offset de c en parametre adresse
-void ecrire(Elf32_Shdr_Content *c, int32_t result, Shdr_list *list){
-	int j;	
-	int32_t mask;
-	printf("\nResult : %08x \n",result);
-	for (j=3;j>=0;j--){
-		mask = 0x000000ff;
-		list->dump[c->offset+j] = result & mask;  			
-		result = result >> 8;
-	}
-
+// Effectuer la reimplantation des sections 
+void ri_abs32( Elf32_Rel R, Elf32_Shdr H ,Shdr_list* l, Sym_list sym_list   ){
+	Shdr_list * S  = find_section( num_sections[H.sh_info], l ); // La section où la relocation doit avoir lieu 
+	unsigned int *pdata = (unsigned int*)(S->dump + R.r_offset);
+	unsigned int data = __bswap_32(*pdata);
+	// Calcul de la valeur finale 
+	data += sym_list.list[ELF32_R_SYM(R.r_info)].st_value;
+	*pdata = __bswap_32( data );
 }
 
-
-//parametre content_list + info
-void ARM(Elf32_Shdr_Content *rel_content, int info){
-	
-	Elf32_Shdr_Content *c = rel_content;
-	Shdr_list *list;
-	int32_t S,A,P,result;
-	
-	int j;	
-	int addresse;
-
-	while(c!=NULL)
-	{
-		
-		printf("info : %x\n", info);
-
-		//Calcul des différentes valeurs necessaire : S, A, T, et P (T est égal à 0 dans notre cas)
-
-		//Récupération de S l'addresse du symbole
-		S = sym_list.list[c->sym].st_value;
-
-		//Calcul de l'addend
-		list = find_section(info);
-		addresse = 0;
-		for (j=0;j<4;j++){
-			addresse = addresse << 8;
-			addresse |= list->dump[c->offset+j];
-		}
-	
-		printf("Addend :  %08x\nS : %08x\n",addresse,S );
-		A = addresse;
-		
-		//Calcul de P
-		P = c->offset;
-
-		switch (c->type){
-			case 2 :			//ABS_32
-				result = S + A;
-				ecrire(c,result,list);
-				break;		
-			case 5 :			//ABS_16
-				result = S + A;
-				ecrire(c,result,list);
-				break;		
-			case 8 :			//ABS_8
-				result = S + A;
-				ecrire(c,result,list);
-				break;		
-			case 28 :			//JUMP24
-				result = (S + A) - P;
-				ecrire(c,result,list);
-				printf("\nP : %08x\n", P);
-				break;	
-			case 29 :			//ARMCALL
-				result = (S + A) - P;
-				ecrire(c,result,list);
-				printf("\nP : %08x\n", P);
-				break;
-		}
-		c = c->next;
-	}	
+void ri_abs16( Elf32_Rel R, Elf32_Shdr H, Shdr_list* l, Sym_list sym_list   ){
+	Shdr_list * S  = find_section( num_sections[H.sh_info], l ); // La section où la relocation doit avoir lieu 
+	unsigned short int *pdata = (unsigned short int*)(S->dump + R.r_offset);
+	unsigned short int data = __bswap_16(*pdata);
+	// Calcul de la valeur finale 
+	data += (unsigned short int)sym_list.list[ELF32_R_SYM(R.r_info)].st_value;
+	*pdata = __bswap_16( data );
 }
 
-//Réimplantation des types R_ARM_ABS
-//parametre shdr_list : rel_list
-//appel arm pour chaque content_list avec info
-void ARM_ABS(Shdr_list *rel_list, int *num_sections){
-	int cmpt=0,info;
-	Shdr_list *copie_shdr = rel_list;
-	Elf32_Shdr_Content *c;
-	c = malloc(sizeof(Elf32_Shdr_Content));
-	while (copie_shdr != NULL){
-		read_Elf32_Shdr_Content(rel_list,cmpt,c);
-		info = copie_shdr->header.sh_info;
-		info = num_sections[info];
-		ARM(c,info);		
-		copie_shdr = copie_shdr->next;
-		cmpt++;	
+void ri_abs8( Elf32_Rel R, Elf32_Shdr H, Shdr_list* l, Sym_list sym_list   ){
+	Shdr_list * S  = find_section( num_sections[H.sh_info], l ); // La section où la relocation doit avoir lieu 
+	unsigned char data = S->dump[R.r_offset];
+	// Calcul de la valeur finale 
+	data += (unsigned char)sym_list.list[ELF32_R_SYM(R.r_info)].st_value;
+	S->dump[R.r_offset] = data;
+}
+
+void ri_call( Elf32_Rel R, Elf32_Shdr H, Shdr_list* l, Sym_list sym_list   ){
+	Shdr_list * S  = find_section( num_sections[H.sh_info], l ); // La section où la relocation doit avoir lieu 
+	unsigned int *pdata = (unsigned int*)(S->dump + R.r_offset);
+	unsigned int data = __bswap_32(*pdata), tmp;
+	// Calcul de la valeur finale 
+	tmp = data & 0xFF000000;
+	data = (data & 0x00FFFFFF) << 2;
+	//printf("Relocation in section %d: addend %x value 0x%x location 0x%x becomes ",num_sections[H.sh_info], data, sym_list.list[ELF32_R_SYM(R.r_info)].st_value, ( S->header.sh_addr + R.r_offset ) );
+	data += sym_list.list[ELF32_R_SYM(R.r_info)].st_value;
+	data -= (S->header.sh_addr + R.r_offset );
+	data = ( data & 0x03FFFFFE ) >> 2;
+	data = (data & 0x00FFFFFF) | tmp;
+	*pdata = __bswap_32( data );
+	//printf(" %x\n", data & 0xFFFFFFFF );
+}
+
+void ri_jump24( Elf32_Rel R, Elf32_Shdr H, Shdr_list* l, Sym_list sym_list   ){
+	Shdr_list * S  = find_section( num_sections[H.sh_info] ); // La section où la relocation doit avoir lieu 
+	unsigned int *pdata = (unsigned int*)(S->dump + R.r_offset);
+	unsigned int data = __bswap_32(*pdata), tmp;
+	// Calcul de la valeur finale 
+	tmp = data & 0xFF000000;
+	data = (data & 0x00FFFFFF) << 2;
+	//printf("Relocation in section %d: addend %x value 0x%x location 0x%x becomes ",num_sections[H.sh_info], data, sym_list.list[ELF32_R_SYM(R.r_info)].st_value, ( S->header.sh_addr + R.r_offset ) );
+	data += sym_list.list[ELF32_R_SYM(R.r_info)].st_value;
+	data -= (S->header.sh_addr + R.r_offset );
+	data = ( data & 0x03FFFFFE ) >> 2;
+	data = (data & 0x00FFFFFF) | tmp;
+	*pdata = __bswap_32( data );
+	//printf(" %x\n", data & 0xFFFFFFFF );
+}
+
+void reimplantation(Shdr_list * rel_list, Shdr_list* l, Sym_list s  ){
+
+	Shdr_list * L = rel_list;
+	Elf32_Rel R; 
+	void *dump;
+	unsigned bytes_lus;
+	if ( L == NULL )
+		return;
+	while( L != NULL ){
+		dump = L->dump;
+		// Lecture d'une relocation a effectuer 
+		for( bytes_lus = 0; bytes_lus < L->header.sh_size; bytes_lus += sizeof(Elf32_Rel) ){
+			R.r_offset = __bswap_32( *((Elf32_Addr*)dump) );
+			R.r_info = __bswap_32( (((Elf32_Word*)dump)[1]) );
+			//printf("Offset : %x type : %x sym : %x \n", R.r_offset, ELF32_R_TYPE(R.r_info), ELF32_R_SYM(R.r_info) );
+			switch( ELF32_R_TYPE(R.r_info) ){
+				case R_ARM_ABS32:
+					ri_abs32( R , L->header);
+					break;
+				case R_ARM_ABS16:
+					ri_abs16( R, L->header );
+					break;
+				case R_ARM_ABS8:
+					ri_abs8( R, L->header );
+					break;
+				case R_ARM_JUMP24:
+					ri_jump24( R, L->header );
+					break;
+				case R_ARM_CALL:
+					ri_call( R, L->header );
+					break;
+				default:
+					break;
+			}
+			dump = dump + sizeof(Elf32_Rel);
+		}
+		L = L->next;
 	}
 }
