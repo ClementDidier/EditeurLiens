@@ -1,7 +1,7 @@
-#include "../api/API.h"
+#include "../Programme_Editeur_Liens/API.h"
 #include <stdio.h>
 #include <elf.h>
-#include "../affichage_sections.h"
+#include "../Fonction_Non_Utilisées/affichage_sections.h"
 
 int main(int argc, char * argv[])
 {

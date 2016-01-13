@@ -1,7 +1,7 @@
 #ifndef _REIMPLANTATION_
 #define _REIMPLANTATION_
 
-#include "../api/API.h"
+#include "API.h"
 
 //ecrit à l'offset de c en parametre adresse
 void ecrire(Elf32_Shdr_Content *c, int32_t result, Shdr_list *list);

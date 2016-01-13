@@ -1,5 +1,5 @@
-#include "../partie2/renumeration_section.h"
-#include "../partie2/correction_symboles.h"
+#include "../Programme_Editeur_Liens/renumeration_section.h"
+#include "../Programme_Editeur_Liens/correction_symboles.h"
 
 int main(int argc, char * argv[])
 {
