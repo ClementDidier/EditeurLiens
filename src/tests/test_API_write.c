@@ -1,7 +1,7 @@
-#include "API.h"
+#include "../api/API.h"
 #include <stdio.h>
 #include <elf.h>
-#include "affichage_sections.h"
+#include "../affichage_sections.h"
 
 int main(int argc, char * argv[])
 {

@@ -452,7 +452,7 @@ void write_Sym_list(FILE * f, Elf32_Ehdr h, Sym_list l)
 	}
 }
 
-Shdr_list * find_section_name(char **names,char *name, int Shdr_list *l)
+Shdr_list * find_section_name(char **names,char *name, Shdr_list *l)
 {
 	Shdr_list *list = l;
 	int i=0;
@@ -460,7 +460,7 @@ Shdr_list * find_section_name(char **names,char *name, int Shdr_list *l)
 		i++;
 		list = list->next;
 	}
-	if(list!=NULL)list=find_section(i);
+	if(list!=NULL) list=find_section(i, l);
 	return list;
 }
 

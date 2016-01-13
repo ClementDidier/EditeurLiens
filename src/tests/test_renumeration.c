@@ -1,5 +1,5 @@
-#include "renumeration_section.h"
-#include "correction_symboles.h"
+#include "../partie2/renumeration_section.h"
+#include "../partie2/correction_symboles.h"
 
 int main(int argc, char * argv[])
 {
