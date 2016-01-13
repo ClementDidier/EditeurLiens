@@ -213,7 +213,7 @@ int16_t lire_2_octets(unsigned char *dump,int i){
 }
 
 
-Sym_list  read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * list, Shdr_list sl, char **names){
+Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * list, Shdr_list sl, char **names){
 	Sym_list * l = list;
 	Shdr_list * retour;
 	retour = find_section_name(names,".symtab",&sl);
@@ -221,17 +221,17 @@ Sym_list  read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * list, Shdr_list sl, ch
 	int j=0;
 	l->list = malloc(retour->header.sh_size);
 	while(i != retour->header.sh_size){
-		l->list[j].st_name = recuperer_valeur32(h,lire_4_octets(retour->dump,i)); i += 4;
+		l->list[j].st_name = lire_4_octets(retour->dump,i); i += 4;
 		printf("\nIci on lit ça : %08x\n",l->list[j].st_name);
-		l->list[j].st_value = recuperer_valeur32(h,lire_4_octets(retour->dump,i)); i += 4;
+		l->list[j].st_value = lire_4_octets(retour->dump,i); i += 4;
 		printf("\nIci on lit ça : %08x\n",l->list[j].st_value);
-		l->list[j].st_size = recuperer_valeur32(h,lire_4_octets(retour->dump,i)); i += 4;
+		l->list[j].st_size = lire_4_octets(retour->dump,i); i += 4;
 		printf("\nIci on lit ça : %08x\n",l->list[j].st_size);
 		l->list[j].st_info = retour->dump[i]; i ++;
 		printf("\nIci on lit ça : %02x\n",l->list[j].st_info);
 		l->list[j].st_other = retour->dump[i]; i ++;
 		printf("\nIci on lit ça : %02x\n",l->list[j].st_other);
-		l->list[j].st_shndx = recuperer_valeur16(h,lire_2_octets(retour->dump,i)); i += 2;
+		l->list[j].st_shndx = lire_2_octets(retour->dump,i); i += 2;
 		
 		j++;
 	}
