@@ -5,7 +5,7 @@
 
 int main(int argc, char * argv[])
 {
-	FILE* f = NULL;
+	/*FILE* f = NULL;
 	if((f = fopen(argv[1], "r")) == NULL)
 	{
 		printf("Erreur lors de la lecture du fichier ELF\n");
@@ -41,6 +41,6 @@ int main(int argc, char * argv[])
 	afficher_table_sections(fresult);
 	
 	fclose(f);
-	fclose(fresult);
+	fclose(fresult);*/
 	return 0;
 }

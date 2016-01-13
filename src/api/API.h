@@ -84,7 +84,7 @@ void read_Shdr_list(FILE *f, Elf32_Ehdr h, Shdr_list * l);
 void afficher_Shdr_list(Shdr_list * l);
 void afficher_Shdr(Shdr_list * l);
 
-void read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l);
+Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l, Shdr_list sl, char **names);
 void afficher_Sym_list(Sym_list l);
 void afficher_Sym(Elf32_Sym S);
 

@@ -193,6 +193,55 @@ void afficher_Shdr_list(Shdr_list * l)
 	}
 }
 
+
+int32_t lire_4_octets(unsigned char *dump,int i){
+	int32_t truc,j;
+		for(j=0;j<4;j++){
+			truc = truc << 8;
+			truc |= dump[i+j];
+		}	
+	return truc;
+}
+
+int16_t lire_2_octets(unsigned char *dump,int i){
+	int16_t truc,j;
+		for(j=0;j<2;j++){
+			truc = truc << 8;
+			truc |= dump[i+j];
+		}	
+	return truc;
+}
+
+
+Sym_list  read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * list, Shdr_list sl, char **names){
+	Sym_list * l = list;
+	Shdr_list * retour;
+	retour = find_section_name(names,".symtab",&sl);
+	int i=0;
+	int j=0;
+	l->list = malloc(retour->header.sh_size);
+	while(i != retour->header.sh_size){
+		l->list[j].st_name = recuperer_valeur32(h,lire_4_octets(retour->dump,i)); i += 4;
+		printf("\nIci on lit ça : %08x\n",l->list[j].st_name);
+		l->list[j].st_value = recuperer_valeur32(h,lire_4_octets(retour->dump,i)); i += 4;
+		printf("\nIci on lit ça : %08x\n",l->list[j].st_value);
+		l->list[j].st_size = recuperer_valeur32(h,lire_4_octets(retour->dump,i)); i += 4;
+		printf("\nIci on lit ça : %08x\n",l->list[j].st_size);
+		l->list[j].st_info = retour->dump[i]; i ++;
+		printf("\nIci on lit ça : %02x\n",l->list[j].st_info);
+		l->list[j].st_other = retour->dump[i]; i ++;
+		printf("\nIci on lit ça : %02x\n",l->list[j].st_other);
+		l->list[j].st_shndx = recuperer_valeur16(h,lire_2_octets(retour->dump,i)); i += 2;
+		
+		j++;
+	}
+	l->nb = j;
+	return *l;
+
+}
+
+
+/*
 // TODO : Revoir
 // Lecture de l'ensemble des symboles 
 void read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l)
@@ -246,7 +295,7 @@ void read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l)
 	for( i = 0; i < size; i++ )
 		read_Elf32_Sym(f, h, &(l->list[i]));
 }
-
+*/
 
 void afficher_Sym( Elf32_Sym S ){
 	printf("\tname : %d \tvalue : %d \tsize : %d \tinfo : %d \tother : %d \tshndx : %d\n",

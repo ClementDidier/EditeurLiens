@@ -4,7 +4,7 @@
 
 int main(int argc, char * argv[])
 {
-	FILE* f = NULL;
+	/*FILE* f = NULL;
 	if((f = fopen(argv[1], "r")) == NULL)
 	{
 		printf("Erreur lors de la lecture du fichier ELF");
@@ -24,7 +24,7 @@ int main(int argc, char * argv[])
 	read_Sym_list(f, header, &sym_list);
 	afficher_Sym_list(sym_list);
 	
-/*	
+	
 	char **table;
 	int i=0;
 	table = sections_names_table(f,h);
@@ -32,7 +32,7 @@ int main(int argc, char * argv[])
 	{
 		printf("%s\n",table[i]);
 	}	
-*/	
-	fclose(f);
+/	
+	fclose(f); */
 	return 0;
 }
