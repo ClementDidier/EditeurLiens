@@ -14,7 +14,7 @@ int main(int argc, char * argv[])
 	Elf32_Ehdr h;
 	Shdr_list shdr_list;
 	Sym_list sym_list; 
-	char **names;
+	unsigned char **names;
 	
 	printf("-- Lecture de l'entête du fichier...\n");
 	read_Elf32_Ehdr(f, &h);

@@ -69,6 +69,12 @@ Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l, Shdr_list sl, unsign
 void afficher_Sym_list(Sym_list l);
 void afficher_Sym(Elf32_Sym S);
 
+
+//Affichage qui correspond à celui du readelf
+
+void afficher_reimplantation(Elf32_Ehdr h, Shdr_list * shdr_list, unsigned char ** names);
+
+
 // *************************************************************************************************************
 // ***************** Fonction d'ecriture de nos structures vers un fichier ELF resultat ************************
 // *************************************************************************************************************

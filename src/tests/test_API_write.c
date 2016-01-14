@@ -19,7 +19,7 @@ int main(int argc, char * argv[])
 	read_Shdr_list(f, h, &shdr_list);
 	
 	Sym_list sym_list;
-	char ** names = sections_names_table(f,h);
+	unsigned char ** names = sections_names_table(f,h);
 	read_Sym_list(f, h, &sym_list, shdr_list, names);
 	
 	// Creation du fichier

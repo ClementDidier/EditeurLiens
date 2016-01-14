@@ -58,17 +58,17 @@ int main( int argc, char ** argv ){
 		num_sections[i] = i;
 
 	//Affichage du fichiers
-/*	char menu;
+	char menu;
 	printf("Voulez-vous afficher les différentes structures ? o ou n \n");
-	scanf("%c", &menu);
-	while(menu != 'o' || menu != 'n'){
+	scanf(" %c", &menu);
+	while(menu != 'o' && menu != 'n'){
 		printf("Ecrire o ou n s'il vous plaît \n");
-		scanf("%c", &menu);
+		scanf(" %c", &menu);
 	}
 	if(menu == 'o'){
 		int boolean = 1;
 		while(boolean){
-			printf("Quelle section voulez-vous afficher ? \n");
+			printf("\nQuelle section voulez-vous afficher ? \n");
 			printf("En-tête : h\n");
 			printf("En-tête de section : S\n");
 			printf("Table des symboles : s\n");
@@ -76,14 +76,14 @@ int main( int argc, char ** argv ){
 			printf("Affichage des sections : x\n");
 			printf("Tout le fichier : a\n");
 			printf("Finalement, ne rien afficher : q\n");
-			scanf("%c", &menu);
+			scanf(" %c", &menu);
 			switch(menu){
 				case 'h':
 					afficher_Elf32_Ehdr(h);
 					boolean = 0;
 					break;
 				case 'S':
-					afficher_Shdr_list(&shdr_list);
+					afficher_Shdr(&shdr_list);
 					boolean = 0;
 					break;
 				case 's':
@@ -91,7 +91,7 @@ int main( int argc, char ** argv ){
 					boolean = 0;
 					break;
 				case 'r':
-					
+					afficher_reimplantation(h, &shdr_list, names);
 					boolean = 0;
 					break;
 				case 'x':
@@ -109,7 +109,7 @@ int main( int argc, char ** argv ){
 		}
 
 	}
-*/
+
 
 
 	// Suppression des sections de relocation 
@@ -127,9 +127,11 @@ int main( int argc, char ** argv ){
 	// Correction des symboles : 
 	printf("[+]Correction des symboles...\n");
 	correction_symboles(h, &shdr_list, &sym_list, num_sections);
+
 	// Reimplantation
 	printf("[+]Reimplantation...\n");
 	reimplantation(h,rel_list,&shdr_list, sym_list,num_sections);
+
 	// Point d'entree du fichier executable
 	S = find_section_name( names, ".text", &shdr_list );
 	h.e_entry = S->header.sh_addr;
@@ -155,12 +157,12 @@ int main( int argc, char ** argv ){
 	init_simulation( &sim, &shdr_list );
 	
 	//arm_run( sim );
-	/*
+	
 	while( getc( stdin ) != '0' )
 		arm_step( sim );
 	//
 	//liberation des variables utilisées
-*/
+
 	liberer_Shdr_list(&shdr_list);
 	liberer_Shdr_list(rel_list);
 	liberer_Sym_list(&sym_list);

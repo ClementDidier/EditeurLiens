@@ -360,6 +360,36 @@ unsigned char ** sections_names_table(FILE * f, Elf32_Ehdr h)
 }
 
 
+//Création des structure pour afficher proprement les différentes sections
+void afficher_reimplantation(Elf32_Ehdr h, Shdr_list * shdr_list, unsigned char ** names){
+	Shdr_list * copie = shdr_list; 
+	int i;
+	char * nom;
+	// Lecture de chaque section de relocation et affichage
+	while(copie != NULL)
+	{
+		if(copie->header.sh_type == SHT_REL){
+			nom = names[i];
+			printf("Section de relocation : %s à l'adresse de décalage : 0x%x :\n", nom,copie->header.sh_offset );
+			int taille;
+			// lecture et affichage de chaque relocation pour une section
+			for(taille=0; taille < copie->header.sh_size; taille += sizeof(Elf32_Rel)){
+				Elf32_Rel * pelfRel = (Elf32_Rel *)(copie->dump + taille);
+				Elf32_Rel elfRel = *pelfRel;	
+				// Affichage du nom des colonnes de données
+				printf("%16s %16s %16s %16s\n","Offset(hex)","Info","Index","Type");
+				printf("%16x %16x %16d %16d\n",recuperer_valeur32(h, elfRel.r_offset),recuperer_valeur32(h, elfRel.r_info),recuperer_valeur16(h, ELF32_R_SYM(elfRel.r_info)),recuperer_valeur16(h, ELF32_R_TYPE(elfRel.r_info)));
+			}
+			printf("\n");
+		}
+		i++;
+		copie = copie->next;
+	}
+}
+
+
+
+
 //Pour liberer les structures utilisées
 
 void liberer_Shdr_list(Shdr_list *sl){
@@ -379,7 +409,7 @@ void liberer_Shdr_list(Shdr_list *sl){
 		}
 	}
 }
-
+//
 void liberer_Sym_list(Sym_list *sl){
 
 	free(sl->list);
