@@ -35,20 +35,10 @@ int main(int argc, char * argv[])
 
 	sym_list = read_Sym_list(f, header, &sym_list, shdr_list,names);
 	afficher_Sym_list(sym_list);
-	//Ensemble d'instructions pour récupérer et charger les adresses dans le fichier ELF
-	//Rappel : en paramètre on a 
-	//"nom de section" "adresse de chargement"
-	
-	Shdr_list * x;	
-	int j;	
-	for(j=2;j<argc;j+=2){
-		x = find_section_name(names,argv[j],&shdr_list);
-		x->header.sh_addr = char_to_hex(argv[j+1]);
-	}
 	
 	// Suppression des sections de relocation 
 	printf("[+]Séparation des sections de relocation (.rel) ...\n");
-	rel_list = enlever_relocation(header, &shdr_list, rel_list, num_sections);
+	rel_list = enlever_relocation(&header, &shdr_list, rel_list, num_sections);
 	// Affichage a l'ecran 
 	//afficher_Shdr_list(&shdr_list);
 	//printf("rel_list.header : %d\n", rel_list->header.sh_name);

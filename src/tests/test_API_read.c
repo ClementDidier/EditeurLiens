@@ -4,35 +4,37 @@
 
 int main(int argc, char * argv[])
 {
-	/*FILE* f = NULL;
+	FILE* f = NULL;
 	if((f = fopen(argv[1], "r")) == NULL)
 	{
-		printf("Erreur lors de la lecture du fichier ELF");
+		printf("Erreur lors de la lecture du fichier ELF\n");
 		return -1;
 	}
 	
-	Elf32_Ehdr header;
+	Elf32_Ehdr h;
 	Shdr_list shdr_list;
 	Sym_list sym_list; 
+	char **names;
 	
-	read_Elf32_Ehdr(f, &header);
-	afficher_Elf32_Ehdr(header);
+	printf("-- Lecture de l'entête du fichier...\n");
+	read_Elf32_Ehdr(f, &h);
+	afficher_Elf32_Ehdr(h);
 	
-	read_Shdr_list(f, header, &shdr_list);
+	printf("-- Lecture des entêtes de sections du fichier...\n");
+	read_Shdr_list(f, h, &shdr_list);
 	afficher_Shdr_list(&shdr_list);
-	
-	read_Sym_list(f, header, &sym_list);
+
+	printf("-- Lecture de la liste de symboles du fichier...\n");
+	names = sections_names_table(f,h);
+	read_Sym_list(f, h, &sym_list, shdr_list, names);
 	afficher_Sym_list(sym_list);
 	
-	
-	char **table;
 	int i=0;
-	table = sections_names_table(f,h);
 	for(;i<h.e_shnum;i++)
 	{
-		printf("%s\n",table[i]);
+		printf("%s\n",names[i]);
 	}	
-/	
-	fclose(f); */
+
+	fclose(f);
 	return 0;
 }

@@ -148,7 +148,7 @@ int32_t lire_4_octets(unsigned char *dump, int i)
 
 int16_t lire_2_octets(unsigned char *dump,int i)
 {
-	unsigned short *pdata = (unsigned int*)(dump + i);
+	unsigned short *pdata = (unsigned short*)(dump + i);
 	unsigned short data = *pdata;
 	return data;
 }
