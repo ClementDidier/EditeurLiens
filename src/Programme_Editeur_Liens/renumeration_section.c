@@ -1,7 +1,7 @@
 #include "renumeration_section.h"
 
 // prend une structure de type Sdr_list et supprime les sections REL ou RELA
-Shdr_list * enlever_relocation(Elf32_Ehdr h, Shdr_list * l, Shdr_list * rel_list, int * num_sections)
+Shdr_list * enlever_relocation(Elf32_Ehdr *h, Shdr_list * l, Shdr_list * rel_list, int * num_sections)
 {
 	Shdr_list * copie = l->next, *prec = l, * copie_rel = rel_list, *L = l;
 	int indice_section = 1; 
@@ -47,9 +47,9 @@ Shdr_list * enlever_relocation(Elf32_Ehdr h, Shdr_list * l, Shdr_list * rel_list
 	}
 	
 	num_sections[indice_section] = indice_saut;
-	h.e_shnum = indice_saut;
-	h.e_shstrndx = num_sections[h.e_shstrndx];
-	h.e_type = ET_EXEC;
+	h->e_shnum = indice_saut;
+	h->e_shstrndx = num_sections[h->e_shstrndx];
+	h->e_type = ET_EXEC;
 	
 	
 	

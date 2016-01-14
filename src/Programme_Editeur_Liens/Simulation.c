@@ -7,6 +7,18 @@
 #include <stdio.h>
 #include "debug.h"
 
+/*
+void liberer_Shdr_list(Shdr_list *sl){
+	Shdr_list prec = sl;
+	while(sl != NULL){
+		sl = sl->next
+		free(prec);
+		prec = sl;
+	}
+
+}
+*/
+
 void init_simulation( arm_simulator_data_t *sim , Shdr_list *shdr_list){
 	Shdr_list *L = shdr_list;
 	*sim = arm_connect( "localhost", "6666" );
@@ -58,7 +70,7 @@ int main( int argc, char ** argv ){
 
 	// Suppression des sections de relocation 
 	printf("[+]Séparation des sections de relocation (.rel) ...\n");
-	rel_list = enlever_relocation(h, &shdr_list, rel_list, num_sections);	
+	rel_list = enlever_relocation(&h, &shdr_list, rel_list, num_sections);	
 
 	L = &shdr_list;
 	// Mise a jour des adresses des sections
