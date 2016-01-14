@@ -289,13 +289,7 @@ void afficher_Shdr( Shdr_list * l)
 {
 	Elf32_Shdr s = l->header;
 	int i;
-	printf("  [+]Header\n\tsh_name : %d\n\tsh_type : %d\n\tsh_addr : %d\n\tsh_offset : %d\n\tsh_size : %d\n\tsh_entsize : %d\n\tsh_flags : %d\n\tsh_link : %d\n\tsh_info : %d\n\tsh_addralign : %d\n",  s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);	
-	printf("  [+] Content\n\t");
-	for( i = 0; i < l->header.sh_size; i++ )
-	{
-		printf("%.02x", (unsigned char)(l->dump[i]));
-	}
-	printf("\n");
+	printf("%d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\n",  s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);	
 }
 
 void afficher_Shdr_list(Shdr_list * l)
@@ -303,8 +297,9 @@ void afficher_Shdr_list(Shdr_list * l)
 	int i = 0;
 	Shdr_list * L = l;
 	printf(" Liste des section headers : \n");
+	printf("Num :  \tsh_name : \tsh_type : \tsh_addr : \tsh_offset : \tsh_size : \tsh_entsize : \tsh_flags : \tsh_link : \tsh_info : \tsh_addralign : \n");	
 	while( L != NULL ){
-		printf(" Section [%d] :\n",i++);
+		printf(" %d\t",i++);
 		afficher_Shdr(L);
 		L = L->next;
 	}

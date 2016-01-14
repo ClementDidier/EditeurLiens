@@ -82,7 +82,7 @@ int main( int argc, char ** argv ){
 					afficher_en_tete(h);
 					break;
 				case 'S':
-					afficher_Shdr(&shdr_list);
+					afficher_Shdr_list(&shdr_list);
 					break;
 				case 's':
 					afficher_Sym_list(sym_list);
