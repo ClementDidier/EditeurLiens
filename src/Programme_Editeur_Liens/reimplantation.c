@@ -73,8 +73,8 @@ void reimplantation(Elf32_Ehdr h, Shdr_list * rel_list, Shdr_list* l, Sym_list s
 		// Lecture d'une relocation a effectuer 
 		for( bytes_lus = 0; bytes_lus < L->header.sh_size; bytes_lus += sizeof(Elf32_Rel) )
 		{
-			R.r_offset = __bswap_32( *((Elf32_Addr*)dump) );
-			R.r_info = __bswap_32( (((Elf32_Word*)dump)[1]) );
+			R.r_offset = recuperer_valeur32(h, *((Elf32_Addr*)dump) );
+			R.r_info = recuperer_valeur32(h, (((Elf32_Word*)dump)[1]) );
 			//printf("Offset : %x type : %x sym : %x \n", R.r_offset, ELF32_R_TYPE(R.r_info), ELF32_R_SYM(R.r_info) );
 			switch( ELF32_R_TYPE(R.r_info) ){
 				case R_ARM_ABS32:

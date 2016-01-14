@@ -6,20 +6,25 @@ make all
 chmod u+x ./test_affichage_sections
 chmod u+x ./test_API_read
 chmod u+x ./test_API_write
+chmod u+x ./test_renumeration
 
-# Lancement de l'affichage des headers de sections
-echo -e "\n\n----------------------------------------------------------------------------------\n"
-echo -e "\n\n[TEST - example1.o] Affichage des détails des entêtes de sections\n"
+echo -e "\n\n----------------------------------------------------------------------------------"
+echo -e "[TEST - $1] Affichage des détails des entêtes de sections"
 echo -e "----------------------------------------------------------------------------------\n"
-./test_affichage_sections examples/example1.o
+./test_affichage_sections $1
 
-echo -e "\n\n----------------------------------------------------------------------------------\n"
-echo -e "\n\n[TEST API - example1.o] Affichage du header, des headers de sections et des symboles\n"
+echo -e "\n\n----------------------------------------------------------------------------------"
+echo -e "[TEST API - $1] Affichage du header, des headers de sections et des symboles"
 echo -e "----------------------------------------------------------------------------------\n"
-./test_API_read examples/example1.o
+./test_API_read $1
 
 
-echo -e "\n\n----------------------------------------------------------------------------------\n"
-echo -e "[TEST API - example1.o] Affichage du header, des headers de sections et des symboles\n"
+echo -e "\n\n----------------------------------------------------------------------------------"
+echo -e "[TEST API - $1] Ecriture du header, des headers de sections et des symboles"
 echo -e "----------------------------------------------------------------------------------\n"
-./test_API_write examples/example1.o
+./test_API_write $1
+
+echo -e "\n\n----------------------------------------------------------------------------------"
+echo -e "[TEST - $1] Affichage des détails des entêtes de sections"
+echo -e "----------------------------------------------------------------------------------\n"
+./test_renumeration $1
