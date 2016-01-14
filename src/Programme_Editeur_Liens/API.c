@@ -154,7 +154,7 @@ int16_t lire_2_octets(unsigned char *dump,int i)
 }
 
 
-Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * list, Shdr_list sl, char **names)
+Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * list, Shdr_list sl, unsigned char **names)
 {
 	Sym_list * l = list;
 	Shdr_list * retour;
@@ -193,89 +193,6 @@ void afficher_Sym_list(Sym_list l)
 	}
 }
 
-// Charge le contenu de la section donnée dans une structure de données personnalisée
-void read_Elf32_Shdr_Content(Shdr_list *s, unsigned int index, Elf32_Shdr_Content * cp)
-{
-	Shdr_list * sc = s;
-	Elf32_Shdr_Content *c;
-	
-	c = cp;
-	int i;
-	for(i = 0; i < index; i++)
-	{
-		sc = sc->next;
-	}
-	
-	// Lecture du dump
-	int j, k;
-	for(j = 0; j < sc->header.sh_size; j+=8)
-	{
-		c->offset = 0;
-		
-		for(k = 0; k < 4; k++)
-		{
-			c->offset <<= 8;
-			c->offset |= sc->dump[j+k];
-			 
-			c->info <<= 8;
-			c->info |= sc->dump[j+k+4];
-		}
-		
-		c->sym = ELF32_R_SYM(c->info);
-		c->type = ELF32_R_TYPE(c->info);
-		
-		if(j + 8 < sc->header.sh_size)
-		{
-			c->next = malloc(sizeof(Elf32_Shdr_Content));
-			c = c->next;
-		}
-	}
-	c->next = NULL;
-}
-
-void afficher_Elf32_Shdr_Content(Elf32_Shdr_Content c)
-{
-	Elf32_Shdr_Content *cp = &c;
-	while(cp != NULL)
-	{
-		printf("\tOffset : %08x\n", cp->offset);
-		printf("\tInfo : %08x\n", cp->info);
-		printf("\tSym : %06x\n", cp->sym);
-		printf("\tType : %02d\n", cp->type);
-		cp = cp->next;
-	}
-}
-
-// Lis une structure Elf32_Rel (lis une ligne du tableau de relocation)
-// Renvoie le nombre d'octets lus 
-int read_Elf32_Rel( FILE *f, Elf32_Ehdr h, Elf32_Rel *r, int indice, Elf32_Shdr s)
-{
-	unsigned long int size = sizeof(Elf32_Rel);
-	fseek(f, s.sh_offset, SEEK_SET);
-	fseek(f, indice * sizeof(Elf32_Rel), SEEK_CUR);
-	fread(r, sizeof(Elf32_Rel), 1,f);
-	
-	r->r_offset = recuperer_valeur32(h, r->r_offset);
-	r->r_info 	= recuperer_valeur32(h, r->r_info);
-	return size;
-}
-
-
-// Lis une structure Elf32_Rela (lis une ligne du tableau de relocation)
-// Renvoie le nombre d'octets lus 
-int read_Elf32_Rela( FILE *f, Elf32_Ehdr h, Elf32_Rela *ra, int indice, Elf32_Shdr s)
-{
-	unsigned long int size = sizeof(Elf32_Rela);
-	fseek(f, s.sh_offset, SEEK_SET);
-	fseek(f, indice * sizeof(Elf32_Rela), SEEK_CUR);
-	fread(ra, sizeof(Elf32_Rela), 1, f);
-
-	ra->r_offset 	= recuperer_valeur32(h, ra->r_offset);
-	ra->r_info		= recuperer_valeur32(h, ra->r_info);
-	ra->r_addend	= recuperer_valeur32(h, ra->r_addend);
-	
-	return size;
-}
 
 inline void fwrite_value16(FILE * f, Elf32_Ehdr h, int value, int size)
 {
@@ -382,7 +299,7 @@ void write_Sym_list(FILE * f, Elf32_Ehdr h, Sym_list l)
 	}
 }
 
-Shdr_list * find_section_name(char **names,char *name, Shdr_list *l)
+Shdr_list * find_section_name( unsigned char **names,char *name, Shdr_list *l)
 {
 	Shdr_list *list = l;
 	int i=0;
@@ -416,7 +333,7 @@ Shdr_list * find_symbols_section(Shdr_list * l)
 }
 
 
-char ** sections_names_table(FILE * f, Elf32_Ehdr h)
+unsigned char ** sections_names_table(FILE * f, Elf32_Ehdr h)
 {
 	Elf32_Shdr s;
 	int offset = h.e_shoff + h.e_shstrndx * h.e_shentsize;
@@ -425,7 +342,7 @@ char ** sections_names_table(FILE * f, Elf32_Ehdr h)
 	fread( &offset, 4, 1, f );
 	offset = recuperer_valeur32(h, offset);
 	
-	char ** table = (char**) malloc(h.e_shnum * sizeof(char*));
+	unsigned char ** table = (unsigned char**) malloc(h.e_shnum * sizeof(char*));
 	
 	int i = 0;
 	for(; i < h.e_shnum; i++)
@@ -440,5 +357,43 @@ char ** sections_names_table(FILE * f, Elf32_Ehdr h)
 	}
 	
 	return table;
+}
+
+
+//Pour liberer les structures utilisées
+
+void liberer_Shdr_list(Shdr_list *sl){
+	Shdr_list *prec = sl;
+	int i =0;
+	while(sl != NULL){
+		if(sl->header.sh_name == 0){
+			sl = sl->next;
+			prec = sl;
+		}
+		else{
+			sl = sl->next;
+			free(prec->dump);
+			free(prec);
+			prec = sl;
+			i++;
+		}
+	}
+}
+
+void liberer_Sym_list(Sym_list *sl){
+
+	free(sl->list);
+}
+
+void liberer_tab_name(unsigned char ** names, int h_shnum){
+	int i ;
+	for(i=0; i<h_shnum; i++){
+		free(names[i]);
+	}
+	free(names);
+}
+
+void liberer_num_sections(int * num_sections){
+	free(num_sections);
 }
 
