@@ -63,4 +63,12 @@ Mardi 12 janvier 2016 :
 	-Finalisation des différentes tâches et test sur les fonctions terminées
 	-Boyan : compréhension de la partie 10
 	-Nettoyage et rangement des fichiers du projet ( dans le github )
+
+Mercredi 13 janvier 2016 :
+	-Correction de certain bug dû à l'enlévement des variables globales
+	-Partie 10 : simulation de notre programme sur les exemples fournis : résultat concluant
+
+Jeudi 14 janvier 2016 :
+	-Création de différents tests pour valider notre projet
+	-Création des différents documents à produire
 	
