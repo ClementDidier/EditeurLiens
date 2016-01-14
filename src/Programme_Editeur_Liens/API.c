@@ -179,16 +179,17 @@ Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * list, Shdr_list sl, uns
 
 
 void afficher_Sym( Elf32_Sym S ){
-	printf("\tname : %d \tvalue : %d \tsize : %d \tinfo : %d \tother : %d \tshndx : %d\n",
-	S.st_name, S.st_value, S.st_size, S.st_info, S.st_other, S.st_shndx);  
+	printf("%08x %8d %8d %8d %8d %8d \n", S.st_value, S.st_size, S.st_info, S.st_other, S.st_shndx, S.st_name);  
 }
 
 void afficher_Sym_list(Sym_list l)
 {
 	int i;
+	printf("Table des symboles : \n");
+	printf("%3s %16s %8s %8s %8s %8s %8s\n","Num ","Valeur","Taille","Type", "Vis", "Ndx", "Nom");
 	for( i = 0; i < l.nb; i++ )
 	{
-		printf("Symbole [%d] : \n", i);
+		printf("%3d%10c", i,' ');
 		afficher_Sym(l.list[i]);
 	}
 }
@@ -387,7 +388,45 @@ void afficher_reimplantation(Elf32_Ehdr h, Shdr_list * shdr_list, unsigned char 
 	}
 }
 
+//Afficher joliment le dump d'une section dont on connait le numéro
+void afficher_section(Shdr_list *s,unsigned char **names,int x){
+	Shdr_list *list = s;
+	list = find_section(x,list);	
+	if(list->header.sh_size==0){
+		printf("\nSection '%s' has no data to dump\n\n",names[x]);
+	}
+	else{
+		printf("\nHexdump of section '%s' :\n\t",names[x]);
+		int i,j=0;
+		for(i=0;i<list->header.sh_size;i++){
+			j++;
+			printf("%02x",list->dump[i]);
+			if(j%4==0)printf(" ");
+			if(j%16==0)printf("\n\t");
+		}
+		printf("\n\n");
+	}
+}
 
+//Afficher joliment le dump d'une section dont on connait le nom
+void afficher_section_name(Shdr_list *s,unsigned char **names,char *name){
+	Shdr_list *list = s;
+	list = find_section_name(names,name,list);
+	if(list->header.sh_size==0){
+		printf("\nSection '%s' has no data to dump\n\n",name);
+	}
+	else{
+		printf("\nHexdump of section '%s' :\n\t",name);
+		int i,j=0;
+		for(i=0;i<list->header.sh_size;i++){
+			j++;
+			printf("%02x",list->dump[i]);
+			if(j%4==0)printf(" ");
+			if(j%16==0)printf("\n\t");
+		}
+		printf("\n\n");
+	}
+}
 
 
 //Pour liberer les structures utilisées

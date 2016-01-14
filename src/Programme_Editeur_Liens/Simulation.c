@@ -95,10 +95,23 @@ int main( int argc, char ** argv ){
 					boolean = 0;
 					break;
 				case 'x':
-					
+					printf("Ecrivez le nom ou le numéro de section : ");
+					char *valeur;
+					valeur= (char *) malloc(30*sizeof(char));
+					scanf("%s", valeur);
+					printf("valeur : %s", valeur);
+					if(valeur[0]=='.'){
+						afficher_section_name(&shdr_list,names, valeur);
+					}else{
+						afficher_section(&shdr_list,names, atoi(valeur));
+					}
 					boolean = 0;
 					break;
 				case 'a':
+					afficher_Elf32_Ehdr(h);
+					afficher_Shdr(&shdr_list);
+					afficher_reimplantation(h, &shdr_list, names);
+					afficher_Sym_list(sym_list);
 					boolean = 0;
 					break;
 				case 'q':
