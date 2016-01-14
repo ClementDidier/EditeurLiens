@@ -35,7 +35,7 @@ int main( int argc, char ** argv ){
 
 	//Initialisations des variables utiles
 	Elf32_Ehdr h;
-	Shdr_list shdr_list, *L;
+	Shdr_list shdr_list, *S;
 	Sym_list  sym_list;
 	Shdr_list * rel_list = NULL;
 	int * num_sections;
@@ -56,11 +56,11 @@ int main( int argc, char ** argv ){
 	int i;
 	for( i = 0; i < size_num_sections ; i++)
 		num_sections[i] = i;
-/*
+
 	//Affichage du fichiers
-	char menu;
+/*	char menu;
 	printf("Voulez-vous afficher les différentes structures ? o ou n \n");
-	scnaf("%c", &menu);
+	scanf("%c", &menu);
 	while(menu != 'o' || menu != 'n'){
 		printf("Ecrire o ou n s'il vous plaît \n");
 		scanf("%c", &menu);
@@ -72,22 +72,30 @@ int main( int argc, char ** argv ){
 			printf("En-tête : h\n");
 			printf("En-tête de section : S\n");
 			printf("Table des symboles : s\n");
+			printf("Section de relocation : r\n");
 			printf("Affichage des sections : x\n");
 			printf("Tout le fichier : a\n");
-			printf("Finalement, ne rien afficher : q\n")
+			printf("Finalement, ne rien afficher : q\n");
 			scanf("%c", &menu);
 			switch(menu){
 				case 'h':
-					afficher_Elf32_Ehdr( h )
+					afficher_Elf32_Ehdr(h);
 					boolean = 0;
 					break;
 				case 'S':
+					afficher_Shdr_list(&shdr_list);
 					boolean = 0;
 					break;
 				case 's':
+					afficher_Sym_list(sym_list);
+					boolean = 0;
+					break;
+				case 'r':
+					
 					boolean = 0;
 					break;
 				case 'x':
+					
 					boolean = 0;
 					break;
 				case 'a':
@@ -101,8 +109,8 @@ int main( int argc, char ** argv ){
 		}
 
 	}
-
 */
+
 
 	// Suppression des sections de relocation 
 	printf("[+]Séparation des sections de relocation (.rel) ...\n");
@@ -123,8 +131,8 @@ int main( int argc, char ** argv ){
 	printf("[+]Reimplantation...\n");
 	reimplantation(h,rel_list,&shdr_list, sym_list,num_sections);
 	// Point d'entree du fichier executable
-	L = find_section_name( names, ".text", shdr_list );
-	h.e_entry = L->header.sh_addr;
+	S = find_section_name( names, ".text", &shdr_list );
+	h.e_entry = S->header.sh_addr;
 	h.e_flags |= 0x2;
 	
 	// Ecriture dans un fichier
