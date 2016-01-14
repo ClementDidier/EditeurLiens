@@ -7,17 +7,8 @@
 #include <stdio.h>
 #include "debug.h"
 
-/*
-void liberer_Shdr_list(Shdr_list *sl){
-	Shdr_list prec = sl;
-	while(sl != NULL){
-		sl = sl->next
-		free(prec);
-		prec = sl;
-	}
 
-}
-*/
+
 
 void init_simulation( arm_simulator_data_t *sim , Shdr_list *shdr_list){
 	Shdr_list *L = shdr_list;
@@ -51,7 +42,7 @@ int main( int argc, char ** argv ){
 	Shdr_list * rel_list = NULL;
 	int * num_sections;
 	int size_num_sections;
-	char ** names;
+	unsigned char ** names;
 
 	
 	printf("[+]Lecture du fichier elf...\n");	
@@ -87,7 +78,7 @@ int main( int argc, char ** argv ){
 	printf("[+]Reimplantation...\n");
 	reimplantation(h,rel_list,&shdr_list, sym_list,num_sections);
 	
-	// Ecriture dans un fichier 	
+	// Ecriture dans un fichier
 	if((fres = fopen("elfres.exe", "w")) == NULL)
 	{
 		printf("Erreur lors de la lecture du fichier ELF");
@@ -97,12 +88,12 @@ int main( int argc, char ** argv ){
 	printf("[+]Création du fichier elf executable 'elfres.exe'...\n");
 	write_Elf32_Ehdr( fres, h );
 	write_Shdr_list( fres , h , &shdr_list );
-	
+
 	fclose(f);
 	fclose(fres);
 	
 	printf("[-]Transformation terminee, le resultat peut etre observe via 'readelf [opt] elfres.exe' \n\n");
-	
+	/*
 	printf("[+]Simulation... \n");
 	init_simulation( &sim, &shdr_list );
 	
@@ -110,7 +101,15 @@ int main( int argc, char ** argv ){
 	
 	while( getc( stdin ) != '0' )
 		arm_step( sim );
-	
+	*/
+	//liberation des variables utilisées
+
+	liberer_Shdr_list(&shdr_list);
+	liberer_Shdr_list(rel_list);
+	liberer_Sym_list(&sym_list);
+	liberer_tab_name(names, size_num_sections);
+	liberer_num_sections(num_sections);
+
 	return 0;
 }
 

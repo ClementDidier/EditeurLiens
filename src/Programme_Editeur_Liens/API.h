@@ -27,16 +27,6 @@ struct Sym_list{
 	int nb;
 };
 
-// Structure de données pour un accés simple aux données d'un dump
-typedef struct Elf32_Shdr_Content Elf32_Shdr_Content;
-struct Elf32_Shdr_Content
-{
-	Elf32_Addr offset;
-	Elf32_Word info;
-	int32_t sym;
-	unsigned char type;
-	Elf32_Shdr_Content * next;
-};
 
 
 // *************************************************************************************************************
@@ -65,12 +55,6 @@ void afficher_Elf32_Ehdr( Elf32_Ehdr h );
 int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s);
 // Lis une structure Elf32_Sym
 int read_Elf32_Sym( FILE *f, Elf32_Ehdr h, Elf32_Sym *s );
-// Lis une structure Elf32_Rela (lis une ligne du tableau de relocation)
-// l'indice correspond a la relocation voulue dans la section dans ( numero 0, 1, 2, 3, ... )
-int read_Elf32_Rela( FILE *f, Elf32_Ehdr h, Elf32_Rela *ra, int indice, Elf32_Shdr s);
-// Lis une structure Elf32_Rel (lis une ligne du tableau de relocation)
-int read_Elf32_Rel( FILE *f, Elf32_Ehdr h, Elf32_Rel *r, int indice, Elf32_Shdr s);
-
 
 // *************************************************************************************************************
 // ****** Fonctions de construction et affichage de la structure de donnees sur laquelle on va travailler ******
@@ -81,13 +65,9 @@ void read_Shdr_list(FILE *f, Elf32_Ehdr h, Shdr_list * l);
 void afficher_Shdr_list(Shdr_list * l);
 void afficher_Shdr(Shdr_list * l);
 
-Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l, Shdr_list sl, char **names);
+Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l, Shdr_list sl, unsigned char **names);
 void afficher_Sym_list(Sym_list l);
 void afficher_Sym(Elf32_Sym S);
-
-// Charge le contenu d'une section dans une structure de données personnalisée
-void read_Elf32_Shdr_Content(Shdr_list *s, unsigned int index, Elf32_Shdr_Content * cp);
-void afficher_Elf32_Shdr_Content(Elf32_Shdr_Content c);
 
 // *************************************************************************************************************
 // ***************** Fonction d'ecriture de nos structures vers un fichier ELF resultat ************************
@@ -112,9 +92,19 @@ void write_Sym_list(FILE * f, Elf32_Ehdr h, Sym_list l);
 // Autre : 
 // Renvoie un pointeur vers le debut de la Shdr_list correspondant au numero de section 
 Shdr_list * find_section(int num, Shdr_list * l);
-Shdr_list * find_section_name(char **names,char *name, Shdr_list *l);
+Shdr_list * find_section_name(unsigned char **names,char *name, Shdr_list *l);
 Shdr_list * find_symbols_section(Shdr_list * l);
 
 // Obtient la table des strings
-char ** sections_names_table(FILE * f, Elf32_Ehdr h);
+unsigned char ** sections_names_table(FILE * f, Elf32_Ehdr h);
+
+// *************************************************************************************************************
+// ***************************** Fonctions de libérationdes structures utilisées *******************************
+// *************************************************************************************************************
+
+void liberer_Shdr_list(Shdr_list *sl);
+void liberer_Sym_list(Sym_list *sl);
+void liberer_tab_name(unsigned char ** names, int h_shnum);
+void liberer_num_sections(int * num_sections);
+
 #endif
