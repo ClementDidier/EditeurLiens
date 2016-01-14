@@ -113,17 +113,14 @@ void read_Shdr_list(FILE *f, Elf32_Ehdr h, Shdr_list * L)
 	}
 }
 
-void afficher_Shdr( Shdr_list * l)
+void afficher_Shdr( Shdr_list * l,int indice)
 {
 	Elf32_Shdr s = l->header;
-	int i;
-	printf("  [+]Header\n\tsh_name : %d\n\tsh_type : %d\n\tsh_addr : %d\n\tsh_offset : %d\n\tsh_size : %d\n\tsh_entsize : %d\n\tsh_flags : %d\n\tsh_link : %d\n\tsh_info : %d\n\tsh_addralign : %d\n",  s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);	
-	printf("  [+] Content\n\t");
-	for( i = 0; i < l->header.sh_size; i++ )
-	{
-		printf("%.02x", (unsigned char)(l->dump[i]));
-	}
-	printf("\n");
+	int i,compt = 1;
+	//printf("  [+]Header\n\tsh_name : %d\n\tsh_type : %d\n\tsh_addr : %d\n\tsh_offset : %d\n\tsh_size : %d\n\tsh_entsize : %d\n\tsh_flags : %d\n\tsh_link : %d\n\tsh_info : %d\n\tsh_addralign : %d\n",  s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);	
+	// Affichage du nom des colonnes de données
+	printf("%5s %12s %12s %12s %12s %12s %3s %3s %3s %3s %3s\n","[NumSect]","Nom", "Type", "Adr", "Décala.(hex)", "Taille", "ES", "Fan", "LN", "Inf", "Al");
+	printf("%5d %14d %12d %14.08x %12.08x %12d %3d %3d %3d %3d %3d\n",indice, s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);
 }
 
 void afficher_Shdr_list(Shdr_list * l)
@@ -132,8 +129,9 @@ void afficher_Shdr_list(Shdr_list * l)
 	Shdr_list * L = l;
 	printf(" Liste des section headers : \n");
 	while( L != NULL ){
-		printf(" Section [%d] :\n",i++);
-		afficher_Shdr(L);
+		//printf(" Section [%d] :\n ",i++);
+		afficher_Shdr(L,i);
+		i++;
 		L = L->next;
 	}
 }
