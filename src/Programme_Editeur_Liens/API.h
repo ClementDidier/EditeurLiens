@@ -75,6 +75,9 @@ void afficher_Sym(Elf32_Sym S);
 void afficher_reimplantation(Elf32_Ehdr h, Shdr_list * shdr_list, unsigned char ** names);
 void afficher_section(Shdr_list *s,unsigned char **names,int x);
 void afficher_section_name(Shdr_list *s,unsigned char **names,char *name);
+//Afficher l'en tête du fichier en format présentable
+void afficher_en_tete(Elf32_Ehdr h);
+
 
 // *************************************************************************************************************
 // ***************** Fonction d'ecriture de nos structures vers un fichier ELF resultat ************************

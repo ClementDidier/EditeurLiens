@@ -59,7 +59,7 @@ int main( int argc, char ** argv ){
 
 	//Affichage du fichiers
 	char menu;
-	printf("Voulez-vous afficher les différentes structures ? o ou n \n");
+	printf("Voulez-vous afficher les différentes structures du fichier d'entrée ? o ou n \n");
 	scanf(" %c", &menu);
 	while(menu != 'o' && menu != 'n'){
 		printf("Ecrire o ou n s'il vous plaît \n");
@@ -68,31 +68,27 @@ int main( int argc, char ** argv ){
 	if(menu == 'o'){
 		int boolean = 1;
 		while(boolean){
-			printf("\nQuelle section voulez-vous afficher ? \n");
+			printf("\nQuelle section voulez-vous afficher ? \n\n");
 			printf("En-tête : h\n");
 			printf("En-tête de section : S\n");
 			printf("Table des symboles : s\n");
 			printf("Section de relocation : r\n");
 			printf("Affichage des sections : x\n");
 			printf("Tout le fichier : a\n");
-			printf("Finalement, ne rien afficher : q\n");
+			printf("Ne rien afficher et accéder directement à la simulation : q\n");
 			scanf(" %c", &menu);
 			switch(menu){
 				case 'h':
-					afficher_Elf32_Ehdr(h);
-					boolean = 0;
+					afficher_en_tete(h);
 					break;
 				case 'S':
 					afficher_Shdr(&shdr_list);
-					boolean = 0;
 					break;
 				case 's':
 					afficher_Sym_list(sym_list);
-					boolean = 0;
 					break;
 				case 'r':
 					afficher_reimplantation(h, &shdr_list, names);
-					boolean = 0;
 					break;
 				case 'x':
 					printf("Ecrivez le nom ou le numéro de section : ");
@@ -105,14 +101,13 @@ int main( int argc, char ** argv ){
 					}else{
 						afficher_section(&shdr_list,names, atoi(valeur));
 					}
-					boolean = 0;
+					free(valeur);
 					break;
 				case 'a':
-					afficher_Elf32_Ehdr(h);
+					afficher_en_tete(h);
 					afficher_Shdr(&shdr_list);
 					afficher_reimplantation(h, &shdr_list, names);
 					afficher_Sym_list(sym_list);
-					boolean = 0;
 					break;
 				case 'q':
 					boolean = 0;
@@ -120,6 +115,7 @@ int main( int argc, char ** argv ){
 			}
 
 		}
+		printf("\n");
 
 	}
 

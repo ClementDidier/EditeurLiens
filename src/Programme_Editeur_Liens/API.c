@@ -48,6 +48,178 @@ void afficher_Elf32_Ehdr( Elf32_Ehdr h )
 	printf("HEADER  : \n\te_type : %d\n\te_machine : %d\n\te_version : %d\n\te_entry : %d\n\te_phoff : %d\n\te_shoff : %d\n\te_flags : %d\n\te_ehsize : %d\n\te_phentsize : %d\n\te_phnum : %d\n\te_shentsize : %d\n\te_shnum : %d\n\te_shstrndx : %d\n\n",
 		h.e_type, h.e_machine, h.e_version, h.e_entry, h.e_phoff, h.e_shoff, h.e_flags, h.e_ehsize, h.e_phentsize, h.e_phnum, h.e_shentsize, h.e_shnum, h.e_shstrndx);	
 }
+
+////Afficher l'en tête du fichier en format présentable
+
+// ecriture de e_ident (Magique)
+void aff_ET_indent(Elf32_Ehdr h){
+	int i;
+	printf(" Magique:    ");
+	for(i=0;i<16;i++){
+		if(h.e_ident[i]/16 == 0){
+			printf(" 0%x", h.e_ident[i]);
+		}else{
+			printf(" %02x",h.e_ident[i]);
+		}
+	}
+	printf("\n");
+}
+
+// ecriture de e_version
+void aff_ET_version(Elf32_Ehdr h){
+	switch(h.e_version){
+		case 0 :
+			printf(" Version:\t\t\t\t%d (Invalid Version)\n",h.e_version);
+			break;
+		case 1 :
+			printf(" Version:\t\t\t\t%d (Current Version)\n",h.e_version);
+			break;
+	}
+}
+
+
+// ecriture de e_type
+void aff_ET_type(Elf32_Ehdr h){
+	switch(h.e_type){
+		case ET_NONE :
+			printf(" Type:\t\t\t\t\tNo file type\n");
+			break;
+		case ET_REL :
+			printf(" Type:\t\t\t\t\tRelocatable file\n");
+			break;
+		case 2 :
+			printf(" Type:\t\t\t\t\tExecutable file\n");
+			break;
+		case 3 :
+			printf(" Type:\t\t\t\t\tShared object file\n");
+			break;
+		case 4 :
+			printf(" Type:\t\t\t\t\tCore file\n");
+			break;
+		case 0xff00 :
+			printf(" Type:\t\t\t\t\tProcessor-specific\n");
+			break;
+		case 0xffff :
+			printf(" Type:\t\t\t\t\tProcessor-specific\n");
+			break;
+		default :
+			printf(" ERROR ON THE TYPE OF THE FILE ;)\n");
+			break;
+	}
+}
+
+// ecriture de e_machine
+void aff_ET_machine(Elf32_Ehdr h){
+	switch(h.e_machine){
+		case EM_NONE :
+			printf(" Machine:\t\t\t\tmachine inconne");
+			break;
+		case EM_M32 :
+			printf(" Machine:\t\t\t\tAT&T WE 32100");
+			break;
+		case EM_SPARC :
+			printf(" Machine:\t\t\t\tSun Microsystems SPARC");
+			break;
+		case EM_386 :
+			printf(" Machine:\t\t\t\tIntel 80386");
+			break;
+		case EM_68K :
+			printf(" Machine:\t\t\t\tMotorola 68000");
+			break;
+		case EM_88K :
+			printf(" Machine:\t\t\t\tMotorola 88000");
+			break;
+		case EM_860 :
+			printf(" Machine:\t\t\t\tIntel 80860");
+			break;
+		case EM_MIPS :
+			printf(" Machine:\t\t\t\tMIPS RS3000");
+			break;
+		case EM_PARISC :
+			printf(" Machine:\t\t\t\tHP/PA");
+			break;
+		case EM_SPARC32PLUS :
+			printf(" Machine:\t\t\t\tSPARC avec jeu d'instruction étendu");
+			break;
+		case EM_PPC :
+			printf(" Machine:\t\t\t\tPowerPC");
+			break;
+		case EM_PPC64 :
+			printf(" Machine:\t\t\t\tPowerPC 64 bits");
+			break;
+		case EM_S390 :
+			printf(" Machine:\t\t\t\tIBM S/390");
+			break;
+		case EM_ARM :
+			printf(" Machine:\t\t\t\tARM RISC");
+			break;
+		case EM_SH :
+			printf(" Machine:\t\t\t\tRenesas SuperH");
+			break;
+		case EM_SPARCV9 :
+			printf(" Machine:\t\t\t\tSPARCC v9 64 bits");
+			break;
+		case EM_IA_64 :
+			printf(" Machine:\t\t\t\tIntel Itanium");
+			break;
+		case EM_X86_64 :
+			printf(" Machine:\t\t\t\tAMD x86-64");
+			break;
+		case EM_VAX :
+			printf(" Machine:\t\t\t\tDEC Vax");
+			break;
+		default :
+			printf(" ERROR ON THE FILE'S 'MACHINE'");
+			break;
+	}
+	printf("\n");
+}
+
+void afficher_en_tete(Elf32_Ehdr h){
+	printf("En_tête ELF:\n");
+	//Affichage de l'indent (Magique)	
+	aff_ET_indent(h);
+	//Affichage de la classe	
+	printf(" Classe:\t\t\t\tELF32\n");
+	//Affichage de l'endianness
+	if(my_is_big_endian(h)){
+		printf(" Données:\t\t\t\tcomplément à 2, système à octets de poids fort d'abord (big endian)\n");
+	}
+	else{
+		printf(" Données:\t\t\t\tlittle endian\n");
+	}
+	//Affichage du type
+	aff_ET_type(h);
+	//Affichage de machine
+	aff_ET_machine(h);
+	//Affichage de la version
+	aff_ET_version(h);
+	//Affichage du e_entry
+	printf(" Addresse du point d'entrée:\t\t0x%x\n",h.e_entry);
+	//Affichage du e_phoff
+	printf(" Début des en_têtes du programme:\t%d\n", h.e_phoff);
+	//Affichage du e_shoff
+	printf(" Shoff:\t\t\t\t\t%d\n",h.e_shoff);
+	//Affichage des e_flags
+	printf(" Flags:\t\t\t\t\t0x%x\n",h.e_flags);
+	//Affichage des e_ehsize
+	printf(" Taille de l'en-tête (en octets):\t%d\n", h.e_ehsize);
+	//Affichage du e_phentsize
+	printf(" Taille d'une entrée de la table d'en tête (en octets):\t%d\n", h.e_phentsize);
+	//Affichage du e_phnum
+	printf(" Nombre d'entrée de la table d'en tête:\t%d\n", h.e_phnum);
+	//Affichage du e_shentsize
+	printf(" Taille de section headers:\t\t%d (bytes)\n",h.e_shentsize);
+	//Affichage du e_shnum
+	printf(" Nombre de section headers:\t\t%d\n",h.e_shnum);
+	//Affichage du e_shstrndx
+	printf(" L'index de la table des section headers:\t%d\n",h.e_shstrndx);
+	//Affichage de la taille de l'en_tête
+	int resultat = h.e_phentsize * h.e_phnum ; 
+	printf(" Taille de cet en_tête (en octets):\t\t%d", resultat);
+	printf("\n\n");
+}
+
 // Lis un header de section 
 int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s)
 {
@@ -113,14 +285,17 @@ void read_Shdr_list(FILE *f, Elf32_Ehdr h, Shdr_list * L)
 	}
 }
 
-void afficher_Shdr( Shdr_list * l,int indice)
+void afficher_Shdr( Shdr_list * l)
 {
 	Elf32_Shdr s = l->header;
-	int i,compt = 1;
-	//printf("  [+]Header\n\tsh_name : %d\n\tsh_type : %d\n\tsh_addr : %d\n\tsh_offset : %d\n\tsh_size : %d\n\tsh_entsize : %d\n\tsh_flags : %d\n\tsh_link : %d\n\tsh_info : %d\n\tsh_addralign : %d\n",  s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);	
-	// Affichage du nom des colonnes de données
-	printf("%5s %12s %12s %12s %12s %12s %3s %3s %3s %3s %3s\n","[NumSect]","Nom", "Type", "Adr", "Décala.(hex)", "Taille", "ES", "Fan", "LN", "Inf", "Al");
-	printf("%5d %14d %12d %14.08x %12.08x %12d %3d %3d %3d %3d %3d\n",indice, s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);
+	int i;
+	printf("  [+]Header\n\tsh_name : %d\n\tsh_type : %d\n\tsh_addr : %d\n\tsh_offset : %d\n\tsh_size : %d\n\tsh_entsize : %d\n\tsh_flags : %d\n\tsh_link : %d\n\tsh_info : %d\n\tsh_addralign : %d\n",  s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);	
+	printf("  [+] Content\n\t");
+	for( i = 0; i < l->header.sh_size; i++ )
+	{
+		printf("%.02x", (unsigned char)(l->dump[i]));
+	}
+	printf("\n");
 }
 
 void afficher_Shdr_list(Shdr_list * l)
@@ -129,9 +304,8 @@ void afficher_Shdr_list(Shdr_list * l)
 	Shdr_list * L = l;
 	printf(" Liste des section headers : \n");
 	while( L != NULL ){
-		//printf(" Section [%d] :\n ",i++);
-		afficher_Shdr(L,i);
-		i++;
+		printf(" Section [%d] :\n",i++);
+		afficher_Shdr(L);
 		L = L->next;
 	}
 }
@@ -463,4 +637,6 @@ void liberer_tab_name(unsigned char ** names, int h_shnum){
 void liberer_num_sections(int * num_sections){
 	free(num_sections);
 }
+
+
 
