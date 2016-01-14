@@ -1,7 +1,6 @@
 #Journal de projet
 
 Lundi 4 janvier 2016 :
-	
 	-Prise en main et comprehension du sujet
 	-Distribution des tâches de la phase 1 :
 		*Etape 1 (Affichage de l'en-tête) -> Alixia et Thaqif
@@ -12,14 +11,12 @@ Lundi 4 janvier 2016 :
 	-Début du projet
 
 Mardi 5 janvier 2016 :
-	
 	-Réalisation des étapes
 		*Apparition de bugs
 
 	-Finalisation de l'étape 1
 
 Mercredi 6 janvier 2016 :
-
 	-Correction des bugs
 	-Finalisation de la phase 1
 	-Bilan du travail effectué jusqu'alors
@@ -38,20 +35,17 @@ le travail à faire sur les étapes de la phase 2. Et nous nous sommes munis d'u
 		*Boyan et Thibault : Correction des symboles (adresses absolues et mise à jour des sections)
 
 Jeudi 7 janvier 2016 :
-
 	-Réalisation de l'étape 6 et 7
 	-Mise à jour de l'API
 		*Ajout de fonctions d'affichages pour les différentes structures de données implémantées. 
 		*Ajout de nouvelles variables globales (pour l'en-tête, la liste des headers de section, et la table de symboles)
 
 Vendredi 8 janvier 2016 :
-
 	-Préparation de l'étape 8 : compréhension de la relocation
 	-Mise à jour de l'API
 		*Ajout d'une fonction pour récupérer la structure de réimplantation des données
 
 Lundi 11 janvier 2016 :
-
 	-Audi de code a 10h30
 	-Répartition des tâches pour les jours suivants
 		* Thibault, Alixia et Thaqif : implémentation de la partie 8 et 9
