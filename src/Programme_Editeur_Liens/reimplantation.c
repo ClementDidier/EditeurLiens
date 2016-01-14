@@ -8,7 +8,7 @@ void ri_abs32(Elf32_Ehdr h, Elf32_Rel R, Elf32_Shdr H ,Shdr_list* l, Sym_list sy
 	unsigned int data = recuperer_valeur32(h, *pdata);
 	// Calcul de la valeur finale 
 	data += sym_list.list[ELF32_R_SYM(R.r_info)].st_value;
-	*pdata = __bswap_32( data );
+	*pdata = recuperer_valeur32(h, data );
 }
 
 void ri_abs16(Elf32_Ehdr h, Elf32_Rel R, Elf32_Shdr H, Shdr_list* l, Sym_list sym_list  , int *num_sections  ){
@@ -17,7 +17,7 @@ void ri_abs16(Elf32_Ehdr h, Elf32_Rel R, Elf32_Shdr H, Shdr_list* l, Sym_list sy
 	unsigned short int data = recuperer_valeur16(h,*pdata);
 	// Calcul de la valeur finale 
 	data += (unsigned short int)sym_list.list[ELF32_R_SYM(R.r_info)].st_value;
-	*pdata = __bswap_16( data );
+	*pdata = recuperer_valeur16(h, data );
 }
 
 void ri_abs8(Elf32_Ehdr h, Elf32_Rel R, Elf32_Shdr H, Shdr_list* l, Sym_list sym_list , int *num_sections  ){
