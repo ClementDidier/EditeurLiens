@@ -5,21 +5,22 @@
 
 int main(int argc, char * argv[])
 {
-	/*FILE* f = NULL;
+	FILE* f = NULL;
 	if((f = fopen(argv[1], "r")) == NULL)
 	{
 		printf("Erreur lors de la lecture du fichier ELF\n");
 		return -1;
 	}
 	
-	Elf32_Ehdr header;
-	read_Elf32_Ehdr(f, &header);
+	Elf32_Ehdr h;
+	read_Elf32_Ehdr(f, &h);
 
 	Shdr_list shdr_list;
-	read_Shdr_list(f, header, &shdr_list);
+	read_Shdr_list(f, h, &shdr_list);
 	
 	Sym_list sym_list;
-	read_Sym_list(f, header, &sym_list);
+	char ** names = sections_names_table(f,h);
+	read_Sym_list(f, h, &sym_list, shdr_list, names);
 	
 	// Creation du fichier
 	FILE * fresult = NULL;
@@ -29,18 +30,18 @@ int main(int argc, char * argv[])
 		return -1;
 	}
 	
-	afficher_Elf32_Ehdr(header);
+	afficher_Elf32_Ehdr(h);
 	afficher_Shdr_list(&shdr_list);
 	
-	write_Elf32_Ehdr(fresult, header);
-	write_Shdr_list(fresult, header, &shdr_list);
+	write_Elf32_Ehdr(fresult, h);
+	write_Shdr_list(fresult, h, &shdr_list);
 	
-	write_Sym_list(fresult, header, sym_list);
+	write_Sym_list(fresult, h, sym_list);
 	
 	rewind(fresult);
-	afficher_table_sections(fresult);
+	//afficher_table_sections(fresult);
 	
 	fclose(f);
-	fclose(fresult);*/
+	fclose(fresult);
 	return 0;
 }
