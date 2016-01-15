@@ -539,14 +539,34 @@ void afficher_reimplantation(Elf32_Ehdr h, Shdr_list * shdr_list, unsigned char 
 		if(copie->header.sh_type == SHT_REL){
 			nom = names[i];
 			printf("Section de relocation : %s à l'adresse de décalage : 0x%x :\n", nom,copie->header.sh_offset );
+			printf("%16s %16s %16s %16s\n","Offset(hex)","Info","Index","Type");
 			int taille;
 			// lecture et affichage de chaque relocation pour une section
 			for(taille=0; taille < copie->header.sh_size; taille += sizeof(Elf32_Rel)){
 				Elf32_Rel * pelfRel = (Elf32_Rel *)(copie->dump + taille);
 				Elf32_Rel elfRel = *pelfRel;	
 				// Affichage du nom des colonnes de données
-				printf("%16s %16s %16s %16s\n","Offset(hex)","Info","Index","Type");
-				printf("%16x %16x %16d %16d\n",recuperer_valeur32(h, elfRel.r_offset),recuperer_valeur32(h, elfRel.r_info),recuperer_valeur16(h, ELF32_R_SYM(elfRel.r_info)),recuperer_valeur16(h, ELF32_R_TYPE(elfRel.r_info)));
+				printf("%16x %16x %16d",recuperer_valeur32(h, elfRel.r_offset),recuperer_valeur32(h, elfRel.r_info),recuperer_valeur16(h, ELF32_R_SYM(elfRel.r_info)));
+				switch(recuperer_valeur16(h, ELF32_R_TYPE(elfRel.r_info))) {
+						case 2 :
+							printf(" %16s\n" , "ABS32");
+							break;
+						case 5 :
+							printf(" %16s\n" , "ABS16");
+							break;
+						case 8 :
+							printf(" %16s\n" , "ABS8");
+							break;
+						case 28 :
+							printf(" %16s\n" , "ARMCALL");
+							break;
+						case 29 :
+							printf(" %16s\n" , "JUMP24");
+							break;
+						default :
+							printf(" %16d\n", recuperer_valeur16(h, ELF32_R_TYPE(elfRel.r_info)));
+					
+				}	
 			}
 			printf("\n");
 		}
