@@ -531,7 +531,7 @@ unsigned char ** sections_names_table(FILE * f, Elf32_Ehdr h)
 //Création des structure pour afficher proprement les différentes sections
 void afficher_reimplantation(Elf32_Ehdr h, Shdr_list * shdr_list, unsigned char ** names){
 	Shdr_list * copie = shdr_list; 
-	int i;
+	unsigned int i = 0;
 	char * nom;
 	// Lecture de chaque section de relocation et affichage
 	while(copie != NULL)
