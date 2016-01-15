@@ -85,7 +85,7 @@ int main( int argc, char ** argv ){
 					afficher_Shdr_list(&shdr_list);
 					break;
 				case 's':
-					afficher_Sym_list(sym_list);
+					afficher_Sym_list(sym_list, f , h , names, &shdr_list);
 					break;
 				case 'r':
 					afficher_reimplantation(h, &shdr_list, names);
@@ -105,9 +105,9 @@ int main( int argc, char ** argv ){
 					break;
 				case 'a':
 					afficher_en_tete(h);
-					afficher_Shdr(&shdr_list);
+					afficher_Shdr_list(&shdr_list);
 					afficher_reimplantation(h, &shdr_list, names);
-					afficher_Sym_list(sym_list);
+					afficher_Sym_list(sym_list, f , h , names, &shdr_list);
 					break;
 				case 'q':
 					boolean = 0;
@@ -118,7 +118,6 @@ int main( int argc, char ** argv ){
 		printf("\n");
 
 	}
-
 
 
 	// Suppression des sections de relocation 
@@ -133,9 +132,12 @@ int main( int argc, char ** argv ){
 		L = L->next;
 	}
 	
+
+
 	// Correction des symboles : 
 	printf("[+]Correction des symboles...\n");
-	correction_symboles(h, &shdr_list, &sym_list, num_sections);
+	sym_list = correction_symboles(h, &shdr_list, &sym_list, num_sections);
+
 
 	// Reimplantation
 	printf("[+]Reimplantation...\n");
@@ -145,6 +147,8 @@ int main( int argc, char ** argv ){
 	S = find_section_name( names, ".text", &shdr_list );
 	h.e_entry = S->header.sh_addr;
 	h.e_flags |= 0x2;
+
+
 	
 	// Ecriture dans un fichier
 	if((fres = fopen("elfres.exe", "w")) == NULL)

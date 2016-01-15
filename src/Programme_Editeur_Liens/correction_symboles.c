@@ -6,7 +6,7 @@
 //le header est global
 //
 
-void correction_symboles(Elf32_Ehdr h, Shdr_list * l, Sym_list * sl, int * num_sections)
+Sym_list correction_symboles(Elf32_Ehdr h, Shdr_list * l, Sym_list * sl, int * num_sections)
 {
 	Shdr_list * L;
 	Shdr_list * S = find_symbols_section(l);
@@ -19,7 +19,6 @@ void correction_symboles(Elf32_Ehdr h, Shdr_list * l, Sym_list * sl, int * num_s
 		if( sl->list[i].st_shndx != SHN_ABS ){
 			// Re-indexation des sections correspondants au symbole
 			sl->list[i].st_shndx = num_sections[sl->list[i].st_shndx];
-			/* DEBUG !!!! */  sl->list[i].st_value += 100;
 		
 			// Calcul de la valeur du symbole, i.e son adresse qui vaut offset + adresse de chargement de sa section correspondante 
 			L = find_section((unsigned int)sl->list[i].st_shndx, l);
@@ -34,6 +33,8 @@ void correction_symboles(Elf32_Ehdr h, Shdr_list * l, Sym_list * sl, int * num_s
 			((unsigned char*)dump)[12] = sl->list[i].st_info;
 			((unsigned char*)dump)[13] = sl->list[i].st_other;
 		}
+		dump = dump + sizeof(Elf32_Sym);
 		
 	}	
+	return *sl;
 }
