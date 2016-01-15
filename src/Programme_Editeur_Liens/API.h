@@ -62,8 +62,8 @@ int read_Elf32_Sym( FILE *f, Elf32_Ehdr h, Elf32_Sym *s );
 // Construit l'ensemble des Sections, une liste chainee de structures qui contient à chaque fois le
 // header et le dump d'une section :
 void read_Shdr_list(FILE *f, Elf32_Ehdr h, Shdr_list * l);
-void afficher_Shdr_list(Shdr_list * l);
-void afficher_Shdr(Shdr_list * l);
+void afficher_Shdr_list(Shdr_list * l, FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_list *s);
+void afficher_Shdr(Shdr_list * l, FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_list *s);
 
 Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l, Shdr_list sl, unsigned char **names);
 void afficher_Sym_list(Sym_list l, FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_list *s);

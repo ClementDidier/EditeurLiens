@@ -285,24 +285,104 @@ void read_Shdr_list(FILE *f, Elf32_Ehdr h, Shdr_list * L)
 	}
 }
 
-void afficher_Shdr( Shdr_list * l)
-{
-	Elf32_Shdr s = l->header;
-	int i;
-	printf("%d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\n",  s.sh_name, s.sh_type, s.sh_addr, s.sh_offset, s.sh_size, s.sh_entsize, s.sh_flags, s.sh_link, s.sh_info, s.sh_addralign);	
+///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+void aff_Shdr_type(Elf32_Shdr s){
+	switch(s.sh_type){
+		case SHT_NULL :
+			printf(" %15s ","NULL");
+			break;
+		case SHT_PROGBITS :
+			printf(" %15s ","PROGBITS");
+			break;
+		case SHT_SYMTAB :
+			printf(" %15s ","SYMTAB");
+			break;
+		case SHT_STRTAB :
+			printf(" %15s ","STRTAB");
+			break;
+		case SHT_RELA :
+			printf(" %15s ","RELA");
+			break;
+		case SHT_HASH :
+			printf(" %15s ","HASH");
+			break;
+		case SHT_DYNAMIC :
+			printf(" %15s ","DYNAMIC");
+			break;
+		case SHT_NOTE :
+			printf(" %15s ","NOTE");
+			break;
+		case SHT_NOBITS :
+			printf(" %15s ","NOBITS");
+			break;
+		case SHT_REL :
+			printf(" %15s ","REL");
+			break;
+		case SHT_SHLIB :
+			printf(" %15s ","SHLIB");
+			break;
+		case SHT_DYNSYM :
+			printf(" %15s ","DYNSYM");
+			break;
+		case SHT_LOPROC :
+			printf(" %15s ","LOPROC");
+			break;
+		case SHT_HIPROC :
+			printf(" %15s ","HIPROC");
+			break;
+		case SHT_LOUSER :
+			printf(" %15s ","LOUSER");
+			break;
+		case SHT_HIUSER :
+			printf(" %15s ","HIUSER");
+			break;
+		default :
+			printf(" %15s ","ARM_ATTRIBUTES");
+			break;
+	}
 }
 
-void afficher_Shdr_list(Shdr_list * l)
+
+void aff_Shdr_name( Elf32_Shdr S, FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_list *s){
+
+	Shdr_list *list;
+	list = find_section_name(names,".shstrtab",s);	
+	fseek(f, list->header.sh_offset + S.sh_name, SEEK_SET);
+	char name[256];
+	fscanf(f, "%255s", name);
+	printf(" %-16s\t",name);
+
+}
+
+void afficher_Shdr( Shdr_list *l, FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_list *s){
+	Elf32_Shdr S = l->header;	
+	aff_Shdr_name(S,f,h,names,s);
+	aff_Shdr_type(S);
+	printf(" %08x ",S.sh_addr);
+	printf(" %06x ",S.sh_offset);	
+	printf(" %06x ",S.sh_size);
+	printf(" %02x ",S.sh_entsize);
+	printf(" %03d ",S.sh_flags);
+	printf(" %02d ",S.sh_link);
+	printf(" %03d ",S.sh_info);
+	printf(" %02d ",S.sh_addralign);
+	printf("\n");
+}
+
+void afficher_Shdr_list(Shdr_list * l, FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_list *s)
 {
 	int i = 0;
 	Shdr_list * L = l;
 	printf(" Liste des section headers : \n");
-	printf("Num :  \tsh_name : \tsh_type : \tsh_addr : \tsh_offset : \tsh_size : \tsh_entsize : \tsh_flags : \tsh_link : \tsh_info : \tsh_addralign : \n");	
+	printf("%3s\t %s \t\t\t%16s  %7s %8s %6s %4s %4s %3s %4s %3s\n","Num","Name","Type","Address","Offset","Size","ES","Fan","LN","Inf","Al");	
 	while( L != NULL ){
-		printf(" %d\t",i++);
-		afficher_Shdr(L);
+		printf(" [%d]\t",i++);
+		afficher_Shdr(L,f,h,names,s);
 		L = L->next;
 	}
+	printf("\n");
 }
 
 
@@ -419,7 +499,7 @@ void aff_S_name(Elf32_Sym S, FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_l
 		char name[256];
 		fscanf(f, "%255s", name);
 
-		printf(" %d %s ",S.st_name,name);
+		printf(" %s ",name);
 	}
 }
 
