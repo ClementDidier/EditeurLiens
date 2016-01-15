@@ -344,21 +344,105 @@ Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * list, Shdr_list sl, uns
 
 }
 
-
-void afficher_Sym( Elf32_Sym S ){
-	printf("%08x %8d %8d %8d %8d %8d \n", S.st_value, S.st_size, S.st_info, S.st_other, S.st_shndx, S.st_name);  
+void aff_S_type(Elf32_Sym S){
+	switch (ELF32_ST_TYPE(S.st_info)){
+		case STT_NOTYPE :
+			printf(" %7s ","NOTYPE");
+			break;
+		case STT_OBJECT :
+			printf(" %7s ","OBJECT");
+			break;
+		case STT_FUNC :
+			printf(" %7s ","FUNC");
+			break;
+		case STT_SECTION :
+			printf(" %7s ","SECTION");
+			break;
+		case STT_FILE :
+			printf(" %7s ","FILE");
+			break;
+		case STT_LOPROC :
+			printf(" %7s ","LOPROC");
+			break;
+		case STT_HIPROC :
+			printf(" %7s ","HIPROC");
+			break;
+		default :
+			printf("Si on est ici c'est pas normal");
+			break;
+	}
 }
 
-void afficher_Sym_list(Sym_list l)
+void aff_S_link(Elf32_Sym S){
+	switch (ELF32_ST_BIND(S.st_info)){
+		case STB_LOCAL :
+			printf(" %7s ","LOCAL");
+			break;
+		case STB_GLOBAL :
+			printf(" %7s ","GLOBAL");
+			break;
+		case STB_WEAK :
+			printf(" %7s ","WEAK");
+			break;
+		case STB_LOPROC :
+			printf(" %7s ","LOPROC");
+			break;
+		case STB_HIPROC :
+			printf(" %7s ","HIPROC");
+			break;
+		default :
+			printf("Si on est ici c'est pas normal");
+			break;
+	}
+}
+
+void aff_S_ndx(Elf32_Sym S){
+	if(S.st_shndx == 0){
+		printf(" %3s ","UND");
+	}
+	else{
+		printf(" %3d ",S.st_shndx);
+	}
+}
+
+void aff_S_name(Elf32_Sym S, FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_list *s){
+	if(S.st_name == 0){
+		printf(" ");
+	}
+	else{
+		Shdr_list *list;
+		list = find_section_name(names,".strtab",s);	
+		int offset;
+		//offset = recuperer_valeur32(h, list->header.sh_offset);
+	
+		fseek(f, list->header.sh_offset + S.st_name, SEEK_SET);
+		char name[256];
+		fscanf(f, "%255s", name);
+
+		printf(" %d %s ",S.st_name,name);
+	}
+}
+
+void afficher_Sym( Elf32_Sym S ,FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_list *s){
+	printf("%08x %4x   ", S.st_value, S.st_size);
+	aff_S_type(S);
+	aff_S_link(S);
+	aff_S_ndx(S);
+	aff_S_name(S,f,h,names,s);
+	printf("\n");
+}
+
+void afficher_Sym_list(Sym_list l, FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_list *s)
 {
 	int i;
 	printf("Table des symboles : \n");
-	printf("%3s %16s %8s %8s %8s %8s %8s\n","Num ","Valeur","Taille","Type", "Vis", "Ndx", "Nom");
+	printf("%3s %8s  %4s %7s %7s %5s %3s\n","Num ","Valeur","Tail  ","Type", "Lien", "Ndx", "Nom");
 	for( i = 0; i < l.nb; i++ )
 	{
-		printf("%3d%10c", i,' ');
-		afficher_Sym(l.list[i]);
+		printf("%3d%2c", i,' ');
+		afficher_Sym(l.list[i],f,h,names,s);
 	}
+	printf("\n");
 }
 
 
