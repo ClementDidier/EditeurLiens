@@ -66,8 +66,8 @@ void afficher_Shdr_list(Shdr_list * l);
 void afficher_Shdr(Shdr_list * l);
 
 Sym_list read_Sym_list(FILE *f, Elf32_Ehdr h, Sym_list * l, Shdr_list sl, unsigned char **names);
-void afficher_Sym_list(Sym_list l);
-void afficher_Sym(Elf32_Sym S);
+void afficher_Sym_list(Sym_list l, FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_list *s);
+void afficher_Sym(Elf32_Sym S, FILE *f, Elf32_Ehdr h, unsigned char **names,Shdr_list *s);
 
 
 //Affichage qui correspond à celui du readelf
