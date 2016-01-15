@@ -707,11 +707,14 @@ void afficher_reimplantation(Elf32_Ehdr h, Shdr_list * shdr_list, unsigned char 
 			int taille;
 			// lecture et affichage de chaque relocation pour une section
 			for(taille=0; taille < copie->header.sh_size; taille += sizeof(Elf32_Rel)){
+
+
 				Elf32_Rel * pelfRel = (Elf32_Rel *)(copie->dump + taille);
 				Elf32_Rel elfRel = *pelfRel;	
 				// Affichage du nom des colonnes de données
-				printf("%16x %16x %16d",recuperer_valeur32(h, elfRel.r_offset),recuperer_valeur32(h, elfRel.r_info),recuperer_valeur16(h, ELF32_R_SYM(elfRel.r_info)));
-				switch(recuperer_valeur16(h, ELF32_R_TYPE(elfRel.r_info))) {
+				printf("%16x %16x %16d",recuperer_valeur32(h, elfRel.r_offset),recuperer_valeur32(h, elfRel.r_info), ELF32_R_SYM(recuperer_valeur32(h,elfRel.r_info)));
+	
+				switch(ELF32_R_TYPE(recuperer_valeur32(h,elfRel.r_info))) {
 						case 2 :
 							printf(" %16s\n" , "ABS32");
 							break;
