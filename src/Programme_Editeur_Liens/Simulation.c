@@ -68,7 +68,7 @@ int main( int argc, char ** argv ){
 	if(menu == 'o'){
 		int boolean = 1;
 		while(boolean){
-			printf("\nQuelle section voulez-vous afficher ? \n\n");
+			printf("\nQue voulez-vous afficher ? \n\n");
 			printf("En-tête : h\n");
 			printf("En-tête de section : S\n");
 			printf("Table des symboles : s\n");
@@ -82,7 +82,7 @@ int main( int argc, char ** argv ){
 					afficher_en_tete(h);
 					break;
 				case 'S':
-					afficher_Shdr_list(&shdr_list);
+					afficher_Shdr_list( &shdr_list, f , h , names, &shdr_list);
 					break;
 				case 's':
 					afficher_Sym_list(sym_list, f , h , names, &shdr_list);
@@ -105,7 +105,7 @@ int main( int argc, char ** argv ){
 					break;
 				case 'a':
 					afficher_en_tete(h);
-					afficher_Shdr_list(&shdr_list);
+					afficher_Shdr_list( &shdr_list, f , h , names, &shdr_list);
 					afficher_reimplantation(h, &shdr_list, names);
 					afficher_Sym_list(sym_list, f , h , names, &shdr_list);
 					break;

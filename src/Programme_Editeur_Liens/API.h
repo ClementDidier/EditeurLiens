@@ -28,7 +28,6 @@ struct Sym_list{
 };
 
 
-
 // *************************************************************************************************************
 // *************************** Fonctions d'inversion et de test de l'endianess *********************************
 // *************************************************************************************************************
@@ -39,6 +38,11 @@ struct Sym_list{
 
 // Retourne 1 si l'endianess du header est en big endian, 0 dans le cas contraire
 int my_is_big_endian(Elf32_Ehdr h);
+
+
+
+
+
 
 // *************************************************************************************************************
 // ********* Fonctions de lecture des valeurs codees en big endian vers une architecture little endian *********
@@ -55,6 +59,9 @@ void afficher_Elf32_Ehdr( Elf32_Ehdr h );
 int read_Elf32_Shdr( FILE *f, Elf32_Ehdr h, unsigned int index, Elf32_Shdr * s);
 // Lis une structure Elf32_Sym
 int read_Elf32_Sym( FILE *f, Elf32_Ehdr h, Elf32_Sym *s );
+
+
+
 
 // *************************************************************************************************************
 // ****** Fonctions de construction et affichage de la structure de donnees sur laquelle on va travailler ******
@@ -77,6 +84,8 @@ void afficher_section(Shdr_list *s,unsigned char **names,int x);
 void afficher_section_name(Shdr_list *s,unsigned char **names,char *name);
 //Afficher l'en tête du fichier en format présentable
 void afficher_en_tete(Elf32_Ehdr h);
+
+
 
 
 // *************************************************************************************************************
@@ -108,8 +117,11 @@ Shdr_list * find_symbols_section(Shdr_list * l);
 // Obtient la table des strings
 unsigned char ** sections_names_table(FILE * f, Elf32_Ehdr h);
 
+
+
+
 // *************************************************************************************************************
-// ***************************** Fonctions de libérationdes structures utilisées *******************************
+// ***************************** Fonctions de libération des structures utilisées ******************************
 // *************************************************************************************************************
 
 void liberer_Shdr_list(Shdr_list *sl);
